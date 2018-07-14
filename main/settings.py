@@ -78,6 +78,8 @@ REST_FRAMEWORK = {
     ),
 }
 
+AUTH_USER_MODEL = 'users.User'
+
 ROOT_URLCONF = 'main.urls'
 
 TEMPLATES = [
