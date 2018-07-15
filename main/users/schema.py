@@ -1,4 +1,5 @@
 from graphene_django import DjangoObjectType
+from graphene_django_subscriptions.subscription import Subscription
 from .models import User
 import graphene
 
