@@ -11,8 +11,8 @@ class BatchEnabledGraphQLView(GraphQLView):
         execution_result = self.execute_graphql_request(request, data, query, variables, operation_name, show_graphiql)
 
         status_code = 200
-        
-        import pdb; pdb.set_trace()
+
+        # import pdb; pdb.set_trace()
 
         if execution_result:
             response = {}

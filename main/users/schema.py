@@ -14,14 +14,6 @@ class UserProfileType(DjangoObjectType):
         model = UserProfile
 
 
-class UserType(DjangoObjectType):
-    profile = graphene.Field(UserProfileType)
-
-    class Meta:
-        name = "User"
-        model = User
-
-
 class AuthCertificateType(DjangoObjectType):
     class Meta:
         name = "AuthCertificate"
@@ -48,7 +40,7 @@ class AuthLinkedinType(DjangoObjectType):
         model = AuthLinkedin
 
 
-class UserAuth(graphene.ObjectType):
+class UserAuthType(graphene.ObjectType):
     certificate = graphene.Field(AuthCertificateType)
     facebook = graphene.Field(AuthFacebookType)
     github = graphene.Field(AuthGithubType)
@@ -56,8 +48,16 @@ class UserAuth(graphene.ObjectType):
     linkedin = graphene.Field(AuthLinkedinType)
 
     class Meta:
-        name = "User"
+        name = "UserAuth"
 
+
+class UserType(DjangoObjectType):
+    profile = graphene.Field(UserProfileType)
+    auth = graphene.Field(UserAuthType)
+
+    class Meta:
+        name = "User"
+        model = User
 
 class Query(graphene.ObjectType):
     user = graphene.Field(UserType, id=graphene.Int())
