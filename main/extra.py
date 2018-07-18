@@ -10,14 +10,7 @@ class BatchEnabledGraphQLView(GraphQLView):
 	def get_response(self, request, data, show_graphiql=False):
 		query, variables, operation_name, id = self.get_graphql_params(request, data)
 
-		execution_result = self.execute_graphql_request(
-			request,
-			data,
-			query,
-			variables,
-			operation_name,
-			show_graphiql
-		)
+		execution_result = self.execute_graphql_request(request, data, query, variables, operation_name, show_graphiql)
 
 		status_code = 200
 		if execution_result:

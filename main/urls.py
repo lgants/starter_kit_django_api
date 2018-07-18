@@ -18,19 +18,7 @@ from django.contrib import admin
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 # from main.counters.views import MyView
-
-class BatchEnabledGraphQLView(GraphQLView):
-	"""
-	Modified graphql view that enables batched queries
-	"""
-
-	def __init__(self, **kwargs):
-		kwargs.update({'batch':True})
-		super(BatchEnabledGraphQLView, self).__init__(**kwargs)
-
-	def get_response(self, request, data, show_graphiql=False):
-		import pdb; pdb.set_trace()
-
+from .views import BatchEnabledGraphQLView
 
 
 urlpatterns = [

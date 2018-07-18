@@ -16,6 +16,10 @@ class UserProfile(models.Model):
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128)
 
+    @property
+    def full_name(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
 
 class AuthCertificate(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
@@ -28,15 +32,15 @@ class AuthFacebook(models.Model):
     display_name = models.CharField(max_length=256)
 
 
-class AuthGoogle(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
-    google_id = models.CharField(max_length=256, unique=True)
-    display_name = models.CharField(max_length=256)
-
-
 class AuthGithub(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     gh_id = models.CharField(max_length=256, unique=True)
+    display_name = models.CharField(max_length=256)
+
+
+class AuthGoogle(models.Model):
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    google_id = models.CharField(max_length=256, unique=True)
     display_name = models.CharField(max_length=256)
 
 
