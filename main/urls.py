@@ -25,7 +25,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     # url(r'^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     # url(r'^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True)))
-    # url(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
-    # url(r'^graphql', csrf_exempt(GraphQLView.as_view(batch=True))),
-    url(r'^graphql', csrf_exempt(BatchEnabledGraphQLView.as_view())),
+    url(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    url(r'^graphql', csrf_exempt(GraphQLView.as_view(batch=True))),
+    # url(r'^graphql', csrf_exempt(BatchEnabledGraphQLView.as_view())),
 ]

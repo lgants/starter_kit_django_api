@@ -10,6 +10,11 @@ class Query(
     graphene.ObjectType):
     pass
 
+class Mutation(
+    main.counters.schema.Mutation,
+    graphene.ObjectType):
+    pass
+
 
 # class RootSubscription(
 #     main.counters.schema.Subscriptions,
@@ -20,5 +25,6 @@ class Query(
 
 schema = graphene.Schema(
     query=Query,
-    # subscription=RootSubscription
+    mutation=Mutation
 )
+# subscription=RootSubscription

@@ -27,6 +27,34 @@ class Query(graphene.ObjectType):
         return Counter.objects.all()
 
 
+class AddCounter(graphene.Mutation):
+    class Arguments:
+        amount = graphene.Int()
+
+    amount = graphene.Int()
+    # person = graphene.Field(lambda: Person)
+
+    # def mutate(self, info, amount):
+    #     print("amoutn", amount)
+    #     return AddCounter(amount=amount)
+    # @classmethod
+    # def mutate_and_get_payload(cls, context, info, **input):
+    #     print("yolo")
+    #     pass
+    @classmethod
+    def mutate(cls, context, info, **input):
+    # def mutate(cls, _, args, context, info):
+        # import pdb; pdb.set_trace()
+        amount = input.get('amount')
+        counter = Counter.objects.first()
+        counter.amount = amount
+        counter.save()
+        return AddCounter(amount=counter.amount)
+
+
+class Mutation(graphene.ObjectType):
+    add_counter = AddCounter.Field()
+
 # class CounterSubscription(Subscription):
 #     class Meta:
 #         serializer_class = CounterSerializer
