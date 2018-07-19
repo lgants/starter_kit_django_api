@@ -1,7 +1,7 @@
 from graphene_django import DjangoObjectType
-# from graphene_django_subscriptions.subscription import Subscription
+from graphene_django_subscriptions.subscription import Subscription
 from .models import Counter
-# from .serializers import CounterSerializer
+from .serializers import CounterSerializer
 import graphene
 
 class CounterType(DjangoObjectType):
@@ -55,11 +55,12 @@ class AddCounter(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     add_counter = AddCounter.Field()
 
-# class CounterSubscription(Subscription):
-#     class Meta:
-#         serializer_class = CounterSerializer
-#         stream = 'counters'
-#
-#
-# class Subscriptions(graphene.ObjectType):
-#     counter_subscription = CounterSubscription.Field()
+
+class CounterSubscription(Subscription):
+    class Meta:
+        serializer_class = CounterSerializer
+        stream = 'counter_subscription'
+
+
+class Subscription(graphene.ObjectType):
+    counter_subscription = CounterSubscription.Field()

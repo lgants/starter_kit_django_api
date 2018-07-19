@@ -13,9 +13,11 @@ class BatchEnabledGraphQLView(GraphQLView):
         status_code = 200
 
         # import pdb; pdb.set_trace()
-        print(query)
+        # print(query)
 
         if execution_result:
+            print(execution_result.errors)
+            print(query)
             response = {}
 
             if execution_result.errors:

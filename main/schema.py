@@ -16,15 +16,15 @@ class Mutation(
     pass
 
 
-# class RootSubscription(
-#     main.counters.schema.Subscriptions,
-#     # main.posts.schema.Subscriptions,
-#     graphene.ObjectType):
-#     pass
+class RootSubscription(
+    main.counters.schema.Subscription,
+    graphene.ObjectType):
+    pass
 
 
 schema = graphene.Schema(
     query=Query,
-    mutation=Mutation
+    mutation=Mutation,
+    subscription=RootSubscription
 )
 # subscription=RootSubscription
