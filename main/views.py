@@ -16,9 +16,10 @@ class BatchEnabledGraphQLView(GraphQLView):
         # print(query)
 
         if execution_result:
-            print(execution_result.errors)
-            print(query)
+            # print(execution_result.errors)
+            # print(execution_result.data)
             response = {}
+            import pdb; pdb.set_trace()
 
             if execution_result.errors:
                 response['errors'] = [self.format_error(e) for e in execution_result.errors]
@@ -29,6 +30,8 @@ class BatchEnabledGraphQLView(GraphQLView):
                 response['data'] = execution_result.data
 
             result = self.json_encode(request, response, pretty=show_graphiql)
+
+            print("result", result)
         else:
             result = None
 

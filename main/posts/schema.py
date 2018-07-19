@@ -6,7 +6,6 @@ from .models import (Post, Comment)
 import graphene
 
 class PostType(DjangoObjectType):
-
     class Meta:
         name = 'Post'
         model = Post
@@ -22,10 +21,23 @@ class PostEdges(graphene.ObjectType):
     node = graphene.Field(PostType)
     cursor = graphene.Int()
 
+    def resolve_node(self, info, **kwargs):
+        # import pdb; pdb.set_trace()
+        return Post.objects.first()
+
+    def resolve_cursor(self, info, **kwargs):
+        return 1
+
 
 class PostPageInfo(graphene.ObjectType):
     endCursor = graphene.Int()
     hasNextPage = graphene.Boolean()
+
+    def resolve_endCursor(self, info, **kwargs):
+        return 10
+
+    def resolve_hasNextPage(self, info, **kwargs):
+        return True
 
 
 class PostsType(graphene.ObjectType):
@@ -35,6 +47,16 @@ class PostsType(graphene.ObjectType):
 
     class Meta:
         name = 'Posts'
+
+    def resolve_totalCount(self, info, **kwargs):
+        return Post.objects.all().count()
+
+    def resolve_edges(self, info, **kwargs):
+        return [PostEdges]
+
+    def resolve_pageInfo(self, info, **kwargs):
+        return PostPageInfo
+
 
 class Query(graphene.ObjectType):
     comment = graphene.Field(CommentType,
@@ -57,7 +79,6 @@ class Query(graphene.ObjectType):
         return Post.objects.all().first()
 
     def resolve_posts(self, info, **kwargs):
-        print("yolo")
         return Post.objects.all()
 
 
