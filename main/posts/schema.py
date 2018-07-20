@@ -43,6 +43,7 @@ class PostPageInfo(graphene.ObjectType):
 class PostsType(graphene.ObjectType):
     totalCount = graphene.Int()
     edges = graphene.List(PostEdges)
+    # edges = graphene.Field(PostEdges)
     pageInfo = graphene.Field(PostPageInfo)
 
     class Meta:
@@ -65,7 +66,7 @@ class Query(graphene.ObjectType):
 
     post = graphene.Field(PostType,
                           id=graphene.Int())
-    posts = graphene.List(PostsType,
+    posts = graphene.Field(PostsType,
                           limit=graphene.Int(),
                           after=graphene.Int())
 
