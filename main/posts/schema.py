@@ -5,16 +5,25 @@ from .models import (Post, Comment)
 
 import graphene
 
+
+class CommentType(DjangoObjectType):
+    id = graphene.Int()
+    
+    class Meta:
+        name = 'Comment'
+        model = Comment
+
+
 class PostType(DjangoObjectType):
+    id = graphene.Int()
+    comments = graphene.List(CommentType)
+
     class Meta:
         name = 'Post'
         model = Post
 
-
-class CommentType(DjangoObjectType):
-    class Meta:
-        name = 'Comment'
-        model = Comment
+    def resolve_comments(self, info, **kwargs):
+        return self.comments.all()
 
 
 class PostEdges(graphene.ObjectType):
@@ -34,10 +43,10 @@ class PostPageInfo(graphene.ObjectType):
     hasNextPage = graphene.Boolean()
 
     def resolve_endCursor(self, info, **kwargs):
-        return 10
+        return 1
 
     def resolve_hasNextPage(self, info, **kwargs):
-        return True
+        return False
 
 
 class PostsType(graphene.ObjectType):

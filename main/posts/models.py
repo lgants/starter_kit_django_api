@@ -5,5 +5,5 @@ class Post(models.Model):
     content = models.CharField(max_length=256)
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     content = models.CharField(max_length=256)

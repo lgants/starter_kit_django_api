@@ -66,8 +66,8 @@ class Query(graphene.ObjectType):
     current_user = graphene.Field(UserType, id=graphene.Int())
 
     def resolve_current_user(self, info, **kwargs):
-        # return User.objects.all().first()
-        return None
+        return User.objects.all().first()
+        # return None
 
     def resolve_user(self, info, **kwargs):
         # return User.objects.all().first()
