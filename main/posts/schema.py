@@ -1,14 +1,14 @@
 from graphene_django import DjangoObjectType
-# from graphene_django_subscriptions.subscription import Subscription
+from graphene_django_subscriptions.subscription import Subscription
 from .models import (Post, Comment)
-# from .serializers import (CommentSerializer, PostSerializer)
+from .serializers import (PostSerializer, CommentSerializer)
 
 import graphene
 
 
 class CommentType(DjangoObjectType):
     id = graphene.Int()
-    
+
     class Meta:
         name = 'Comment'
         model = Comment
@@ -92,18 +92,18 @@ class Query(graphene.ObjectType):
         return Post.objects.all()
 
 
-# class CommentSubscription(Subscription):
-#     class Meta:
-#         serializer_class = CommentSerializer
-#         stream = 'comments'
-#
-#
-# class PostSubscription(Subscription):
-#     class Meta:
-#         serializer_class = PostSerializer
-#         stream = 'posts'
-#
-#
-# class Subscriptions(graphene.ObjectType):
-#     comment_subscription = CommentSubscription.Field()
-#     post_subscription = PostSubscription.Field()
+class PostSubscription(Subscription):
+    class Meta:
+        serializer_class = PostSerializer
+        stream = 'posts'
+
+
+class CommentSubscription(Subscription):
+    class Meta:
+        serializer_class = CommentSerializer
+        stream = 'comments'
+
+
+class Subscription(graphene.ObjectType):
+    comment_subscription = CommentSubscription.Field()
+    post_subscription = PostSubscription.Field()

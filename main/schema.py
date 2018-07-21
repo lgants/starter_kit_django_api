@@ -3,14 +3,14 @@ import main.users.schema
 import main.counters.schema
 import main.posts.schema
 
-class Query(
+class RootQuery(
     main.users.schema.Query,
     main.counters.schema.Query,
     main.posts.schema.Query,
     graphene.ObjectType):
     pass
 
-class Mutation(
+class RootMutation(
     main.counters.schema.Mutation,
     graphene.ObjectType):
     pass
@@ -18,13 +18,13 @@ class Mutation(
 
 class RootSubscription(
     main.counters.schema.Subscription,
+    main.posts.schema.Subscription,
     graphene.ObjectType):
     pass
 
 
 schema = graphene.Schema(
-    query=Query,
-    mutation=Mutation,
+    query=RootQuery,
+    mutation=RootMutation,
     subscription=RootSubscription
 )
-# subscription=RootSubscription
