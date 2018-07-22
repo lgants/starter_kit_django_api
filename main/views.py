@@ -1,18 +1,27 @@
 from graphene_django.views import GraphQLView
-from rest_framework.decorators import api_view
+# from rest_framework.renderers import JSONRenderer
+from rest_framework.decorators import api_view #, renderer_classes
 from rest_framework.response import Response
 from django.conf import settings
+import json
 import os
 
-@api_view()
-def SchemaView(request):
-    # import pdb; pdb.set_trace()
+@api_view(['GET'])
+# @renderer_classes((JSONRenderer,))
+def SchemaView(request, format=None):
     path = os.path.join(settings.BASE_DIR, 'main/static/schema.json')
-
     with open(path , 'r') as file:
         data=file.read()
 
-    return Response(data)
+    return Response(json.loads(data))
+
+
+# @api_view(['GET'])
+# def SchemaView(request, format=None):
+#     from django.http import HttpResponse
+#     path = os.path.join(settings.BASE_DIR, 'main/static/schema.json')
+#     return HttpResponse(open(path, 'r'), content_type='application/json; charset=utf8')
+
 
 
 class BatchEnabledGraphQLView(GraphQLView):
