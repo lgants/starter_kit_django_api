@@ -16,27 +16,27 @@ class UserProfileType(DjangoObjectType):
 
 class AuthCertificateType(DjangoObjectType):
     class Meta:
-        name = "AuthCertificate"
+        name = "CertificateAuth"
         model = AuthCertificate
 
 class AuthFacebookType(DjangoObjectType):
     class Meta:
-        name = "AuthFacebook"
+        name = "FacebookAuth"
         model = AuthFacebook
 
 class AuthGithubType(DjangoObjectType):
     class Meta:
-        name = "AuthGithub"
+        name = "GithubAuth"
         model = AuthGithub
 
 class AuthGoogleType(DjangoObjectType):
     class Meta:
-        name = "AuthGoogle"
+        name = "GoogleAuth"
         model = AuthGoogle
 
 class AuthLinkedinType(DjangoObjectType):
     class Meta:
-        name = "AuthLinkedin"
+        name = "LinkedInAuth"
         model = AuthLinkedin
 
 
@@ -58,6 +58,83 @@ class UserType(DjangoObjectType):
     class Meta:
         name = "User"
         model = User
+
+
+# class UserPayload(graphene.ObjectType):
+#     user = graphene.Field(User)
+#     # errors: [FieldError!] ???
+#
+#
+# class OrderByUserInput(graphene.InputObjectType):
+#     # id | username | role | isActive | email
+#     column = graphene.String()
+#     # asc | desc
+#     order = graphene.String()
+#
+#
+# class FilterUserInput(graphene.InputObjectType):
+#     # search by username or email
+#     searchText = graphene.String()
+#     # filter by role
+#     role = graphene.String()
+#     # filter by isActive
+#     isActive = graphene.Boolean()
+#
+# class AuthCertificateInput(graphene.InputObjectType):
+#     serial = graphene.String() #serial: String
+#
+# class AuthFacebookInput(graphene.InputObjectType):
+#     fbId = graphene.String() #fbId: String
+#     displayName = graphene.String() #displayName: String
+#
+# class AuthGithubInput(graphene.InputObjectType):
+#     ghId = graphene.String() #ghId: String
+#     displayName = graphene.String() #displayName: String
+#
+# class AuthGoogleInput(graphene.InputObjectType):
+#     googleId = graphene.String() #googleId: String
+#     displayName = graphene.String() #displayName: String
+#
+# class AuthLinkedinInput(graphene.InputObjectType):
+#     lnId = graphene.String() #lnId: String
+#     displayName = graphene.String() #displayName: String
+#
+# class AuthInput(graphene.InputObjectType):
+#     certificate = AuthCertificateInput #certificate: AuthCertificateInput
+#     facebook = AuthFacebookInput #facebook: AuthFacebookInput
+#     google = AuthGoogleInput #google: AuthGoogleInput
+#     github = AuthGitHubInput #github: AuthGitHubInput
+#     linkedin = AuthLinkedInInput #linkedin: AuthLinkedInInput
+#
+# class ProfileInput(graphene.InputObjectType):
+#     firstName = graphene.String()
+#     lastName = graphene.String()
+#
+# class AddUserInput(graphene.InputObjectType):
+#     username = graphene.String() #username: String!
+#     email = graphene.String()  #email: String!
+#     password = graphene.String() #password: String!
+#     role = graphene.String() #role: String!
+#     isActive = graphene.Boolean() #isActive: Boolean
+#     profile = ProfileInput #profile: ProfileInput
+#     auth = AuthInput #auth: AuthInput
+#
+#
+# class EditUserInput(graphene.InputObjectType):
+#     id = graphene.Int() #id: Int!
+#     username = graphene.String() #username: String!
+#     role = graphene.String() #role: String!
+#     isActive = graphene.Boolean() #isActive: Boolean
+#     email = graphene.String()  #email: String!
+#     password = graphene.String()
+#     profile: ProfileInput
+#     auth: AuthInput
+#
+#
+# class UpdateUserPayload(graphene.ObjectType):
+#     mutation = graphene.String() #mutation: String!
+#     node = User #node: User!
+
 
 class Query(graphene.ObjectType):
     user = graphene.Field(UserType, id=graphene.Int())

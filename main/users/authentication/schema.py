@@ -1,7 +1,6 @@
 from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
-from .models import (User, UserProfile, AuthCertificate, AuthFacebook, AuthGithub, AuthGoogle, AuthLinkedin)
-from main.users import User
+from main.users.models import User
 import graphene
 
 
@@ -18,27 +17,27 @@ class Tokens(graphene.ObjectType):
 class AuthPayload(graphene.ObjectType):
     user = graphene.Field(User)
     tokens = graphene.Field(Tokens) # might be a list
-    errors: [FieldError!] # ???
+    # errors: [FieldError!] # ???
 
 
-class RegisterUserInput(graphene.ObjectType):
+class RegisterUserInput(graphene.InputObjectType):
     username = graphene.String()
     email = graphene.String()
     password = graphene.String()
 
 
-class ForgotPasswordInput(graphene.ObjectType):
+class ForgotPasswordInput(graphene.InputObjectType):
     email = graphene.String()
 
 
-class ResetPasswordInput(graphene.ObjectType):
+class ResetPasswordInput(graphene.InputObjectType):
     token = graphene.String()
     password = graphene.String()
     passwordConfirmation = graphene.String()
 
 
 class ResetPayload(graphene.ObjectType):
-    errors: [FieldError!] # ???
+    # errors: [FieldError!] # ???
     pass
 
 

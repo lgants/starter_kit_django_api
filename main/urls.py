@@ -18,7 +18,7 @@ from django.contrib import admin
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 # from main.counters.views import MyView
-from .views import BatchEnabledGraphQLView
+from .views import BatchEnabledGraphQLView, SchemaView
 
 
 urlpatterns = [
@@ -26,6 +26,7 @@ urlpatterns = [
     # url(r'^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     # url(r'^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True)))
     url(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    url(r'^schema.json', SchemaView),
     # url(r'^graphql', csrf_exempt(GraphQLView.as_view(batch=True))),
     url(r'^graphql', csrf_exempt(BatchEnabledGraphQLView.as_view())),
 ]

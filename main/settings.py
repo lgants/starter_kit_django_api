@@ -66,7 +66,8 @@ MIDDLEWARE = [
 ]
 
 GRAPHENE = {
-    'SCHEMA': 'main.schema.schema'
+    'SCHEMA': 'main.schema.schema',
+    'SCHEMA_OUTPUT': 'main/static/schema.json'
 }
 
 REST_FRAMEWORK = {

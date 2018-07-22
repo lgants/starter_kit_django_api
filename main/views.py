@@ -1,4 +1,19 @@
 from graphene_django.views import GraphQLView
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.conf import settings
+import os
+
+@api_view()
+def SchemaView(request):
+    # import pdb; pdb.set_trace()
+    path = os.path.join(settings.BASE_DIR, 'main/static/schema.json')
+
+    with open(path , 'r') as file:
+        data=file.read()
+
+    return Response(data)
+
 
 class BatchEnabledGraphQLView(GraphQLView):
     def __init__(self, **kwargs):

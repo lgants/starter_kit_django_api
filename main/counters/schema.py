@@ -34,8 +34,11 @@ class AddCounter(graphene.Mutation):
     amount = graphene.Int()
     # person = graphene.Field(lambda: Person)
 
+
+
     @classmethod
     def mutate(cls, context, info, **input):
+        # import pdb; pdb.set_trace()
         amount = input.get('amount')
         counter = Counter.objects.first()
         counter.amount = amount
@@ -50,8 +53,8 @@ class Mutation(graphene.ObjectType):
 class CounterSubscription(Subscription):
     class Meta:
         serializer_class = CounterSerializer
-        stream = 'counter_subscription'
+        stream = 'counterUpdated'
 
 
 class Subscription(graphene.ObjectType):
-    counter_subscription = CounterSubscription.Field()
+    counterUpdated = CounterSubscription.Field()
