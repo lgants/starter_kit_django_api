@@ -41,7 +41,7 @@ class AddCounter(graphene.Mutation):
         # import pdb; pdb.set_trace()
         amount = input.get('amount')
         counter = Counter.objects.first()
-        counter.amount = amount
+        counter.amount += amount
         counter.save()
         return AddCounter(amount=counter.amount)
 

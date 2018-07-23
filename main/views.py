@@ -1,17 +1,23 @@
 from graphene_django.views import GraphQLView
 # from rest_framework.renderers import JSONRenderer
 from rest_framework.decorators import api_view #, renderer_classes
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.conf import settings
 import json
 import os
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
+@permission_classes((AllowAny, ))
 # @renderer_classes((JSONRenderer,))
-def SchemaView(request, format=None):
+def schema_view(request, format=None):
+    print("ello", request.method)
     path = os.path.join(settings.BASE_DIR, 'main/static/schema.json')
     with open(path , 'r') as file:
         data=file.read()
+
+    # import pdb; pdb.set_trace()
 
     return Response(json.loads(data))
 
@@ -32,12 +38,15 @@ class BatchEnabledGraphQLView(GraphQLView):
     def get_response(self, request, data, show_graphiql=False):
         query, variables, operation_name, id = self.get_graphql_params(request, data)
 
+        # if operation_name == 'IntrospectionQuery':
+        #     path = os.path.join(settings.BASE_DIR, 'main/static/schema.json')
+        #     with open(path , 'r') as file:
+        #         data=file.read()
+        #     import pdb; pdb.set_trace()
+
         execution_result = self.execute_graphql_request(request, data, query, variables, operation_name, show_graphiql)
 
         status_code = 200
-
-        # import pdb; pdb.set_trace()
-        # print(query)
 
         if execution_result:
             print(execution_result.errors)
@@ -54,9 +63,15 @@ class BatchEnabledGraphQLView(GraphQLView):
                 response['data'] = execution_result.data
 
             result = self.json_encode(request, response, pretty=show_graphiql)
-
-            print("result", result)
         else:
             result = None
+
+
+        if operation_name == 'IntrospectionQuery':
+            path = os.path.join(settings.BASE_DIR, 'main/static/schema.json')
+            with open(path , 'r') as file:
+                data=file.read()
+
+            return data, 200
 
         return result, status_code
