@@ -42,7 +42,7 @@ class BatchEnabledGraphQLView(GraphQLView):
         #     path = os.path.join(settings.BASE_DIR, 'main/static/schema.json')
         #     with open(path , 'r') as file:
         #         data=file.read()
-        #     import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         execution_result = self.execute_graphql_request(request, data, query, variables, operation_name, show_graphiql)
 

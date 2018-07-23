@@ -34,8 +34,6 @@ class AddCounter(graphene.Mutation):
     amount = graphene.Int()
     # person = graphene.Field(lambda: Person)
 
-
-
     @classmethod
     def mutate(cls, context, info, **input):
         # import pdb; pdb.set_trace()

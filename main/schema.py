@@ -12,6 +12,7 @@ class RootQuery(
 
 class RootMutation(
     main.counters.schema.Mutation,
+    main.posts.schema.Mutation,
     graphene.ObjectType):
     pass
 
