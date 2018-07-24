@@ -1,10 +1,12 @@
 import graphene
 import main.users.schema
+import main.upload.schema
 import main.counters.schema
 import main.posts.schema
 
 class RootQuery(
     main.users.schema.Query,
+    main.upload.schema.Query,
     main.counters.schema.Query,
     main.posts.schema.Query,
     graphene.ObjectType):
@@ -12,6 +14,7 @@ class RootQuery(
 
 class RootMutation(
     main.counters.schema.Mutation,
+    main.upload.schema.Mutation,
     main.posts.schema.Mutation,
     graphene.ObjectType):
     pass

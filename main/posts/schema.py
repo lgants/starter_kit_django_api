@@ -3,7 +3,6 @@ from graphene_django_subscriptions.subscription import Subscription
 from .models import (Post, Comment)
 from .serializers import (PostSerializer, CommentSerializer)
 from main.helpers import get_object, update_or_create, get_errors
-
 import graphene
 
 
