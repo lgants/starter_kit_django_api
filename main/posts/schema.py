@@ -20,6 +20,7 @@ class PostInfo(graphene.Interface):
     title = graphene.String()
     content = graphene.String()
 
+
 class PostType(DjangoObjectType):
     comments = graphene.List(CommentType)
 
@@ -108,8 +109,10 @@ class AddPost(graphene.Mutation):
     class Arguments:
         input = graphene.Argument(AddPostInput)
 
+    id = graphene.String()
     title = graphene.String()
     content = graphene.String()
+    comments = graphene.List(CommentType)
     # TODO: add error handling
 
     @classmethod
