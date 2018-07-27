@@ -35,15 +35,15 @@ class Query(graphene.ObjectType):
     files = graphene.List(FileType)
 
 
-class UploadFiles(graphene.Mutation):
-    class Arguments:
-        files = graphene.List(Upload)
-
-    ok = graphene.Boolean()
-
-    @classmethod
-    def mutate(cls, context, info, **input):
-        pass
+# class UploadFiles(graphene.Mutation):
+#     class Arguments:
+#         files = graphene.List(Upload)
+#
+#     ok = graphene.Boolean()
+#
+#     @classmethod
+#     def mutate(cls, context, info, **input):
+#         pass
 
 
 class RemoveFile(graphene.Mutation):
@@ -56,6 +56,26 @@ class RemoveFile(graphene.Mutation):
     def mutate(cls, context, info, **input):
         pass
 
+
+class UploadFiles(graphene.Mutation):
+    class Arguments:
+        files = graphene.List(Upload)
+        # files = graphene.List(Upload)
+
+    # success = graphene.Boolean()
+    ok = graphene.Boolean()
+
+    # def mutate(self, info, file, **kwargs):
+    def mutate(self, info, files, **kwargs):
+        # file parameter is key to uploaded file in FILES from context
+        uploaded_files = info.context.FILES.get(files)
+        import pdb; pdb.set_trace()
+        # do something with your file
+
+        return UploadFiles(ok=True)
+
+
 class Mutation(graphene.ObjectType):
+    # uploadFiles = UploadFiles.Field()
     uploadFiles = UploadFiles.Field()
     removeFile = RemoveFile.Field()
