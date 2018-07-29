@@ -1,0 +1,6 @@
+[submodule "client/apollo-universal-starter-kit"]
+	path = client/apollo-universal-starter-kit
+	url = https://github.com/lgants/apollo-universal-starter-kit
+[submodule "apollo-universal-starter-kit"]
+	path = apollo-universal-starter-kit
+	url = https://github.com/lgants/apollo-universal-starter-kit
