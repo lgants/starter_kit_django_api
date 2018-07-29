@@ -43,6 +43,7 @@ THIRD_PARTY_APPS = (
     'django_extensions',
     'rest_framework',
     'graphene_django',
+    'webpack_loader',
 )
 
 LOCAL_APPS = (
@@ -71,6 +72,13 @@ GRAPHENE = {
     'SCHEMA_OUTPUT': 'main/static/schema.json'
 }
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'static/bundles/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.dev.json'),
+    }
+}
+
 REST_FRAMEWORK = {
     # 'DEFAULT_RENDERER_CLASSES': (
     #     'rest_framework.renderers.JSONRenderer',
@@ -93,7 +101,7 @@ ROOT_URLCONF = 'main.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, "templates"), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
