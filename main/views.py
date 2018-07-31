@@ -86,6 +86,8 @@ class ModifiedGraphQLView(GraphQLView):
         # print("data", data['operationName'])
         request_type = request.META.get("CONTENT_TYPE", '')
 
+        print("request_type", request_type)
+
         # if data['operationName'] == 'uploadFiles':
         if "multipart/form-data" in request_type:
         # if "multipart/form-data" in request_type:
