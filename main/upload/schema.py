@@ -4,6 +4,10 @@ from .models import Upload as UploadModel
 # from .serializers import (PostSerializer, CommentSerializer)
 # from main.helpers import get_object, update_or_create, get_errors
 import graphene
+import os
+
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 class Upload(graphene.types.Scalar):
     @staticmethod
@@ -67,9 +71,15 @@ class UploadFiles(graphene.Mutation):
 
     # def mutate(self, info, file, **kwargs):
     def mutate(self, info, files, **kwargs):
+        # import pdb; pdb.set_trace()
+
+        for key, file in info.context.FILES.items():
+            path = default_storage.save(file._name, ContentFile(file.read()))
+            # tmp_file = os.path.join(settings.MEDIA_ROOT, path)
+
         # file parameter is key to uploaded file in FILES from context
-        uploaded_files = info.context.FILES.get(files)
-        import pdb; pdb.set_trace()
+        # uploaded_files = info.context.FILES["0"]
+        # uploaded_files = info.context.FILES.get(files)
         # do something with your file
 
         return UploadFiles(ok=True)
