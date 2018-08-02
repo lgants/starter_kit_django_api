@@ -43,16 +43,8 @@ class FileType(DjangoObjectType):
 class Query(graphene.ObjectType):
     files = graphene.List(FileType)
 
-
-# class UploadFiles(graphene.Mutation):
-#     class Arguments:
-#         files = graphene.List(Upload)
-#
-#     ok = graphene.Boolean()
-#
-#     @classmethod
-#     def mutate(cls, context, info, **input):
-#         pass
+    def resolve_files(self, info, **kwargs):
+        return UploadModel.objects.all()
 
 
 class RemoveFile(graphene.Mutation):
@@ -68,63 +60,31 @@ class RemoveFile(graphene.Mutation):
 
 class UploadFiles(graphene.Mutation):
     class Arguments:
-        files = graphene.List(Upload)
         # files = graphene.List(Upload)
+        files = graphene.Argument(graphene.List(Upload))
 
     # success = graphene.Boolean()
     ok = graphene.Boolean()
 
-
-
-    # def handle_uploaded_file(f):
-    #     with open('some/file/name.txt', 'wb+') as destination:
-    #         for chunk in f.chunks():
-    #             destination.write(chunk)
-
-
     # def mutate(self, info, file, **kwargs):
-    # def mutate(self, info, files, **kwargs):
     # def mutate(cls, context, info, **input):
+    # @classmethod
+    # @classmethod
     def mutate(self, info, files, **kwargs):
         try:
             for key, f in info.context.FILES.items():
-                path = os.path.join(settings.MEDIA_ROOT, f._name)
+                path = os.path.join(settings.MEDIA_ROOT, f.name)
                 with open(path, 'wb+') as destination:
                     for chunk in f.chunks():
                         destination.write(chunk)
 
-            # post = get_object(Post, input.get('input').get('id'))
-            # if post:
-                # import pdb; pdb.set_trace()
-                update_or_create(UploadModel(), kwargs.get('input'))
-            return self(ok=True)
-
+                # UploadModel.objects.create(name=f.name, type=f.content_type, size=f.size, path=path)
+            return UploadFiles(ok=True)
         except Exception as e:
-            return self(ok=False, errors=get_errors(e))
-
-
-
-        # for key, f in info.context.FILES.items():
-        #     uploaded_filename = "asdf.jpeg"
-        #
-        #     full_filename = os.path.join(settings.MEDIA_ROOT, uploaded_filename)
-        #     fout = open(full_filename, 'wb+')
-        #
-        #     file_content = ContentFile(f.read())
-        #
-        #     for chunk in file_content.chunks():
-        #         fout.write(chunk)
-        #     fout.close()
-
-        # file parameter is key to uploaded file in FILES from context
-        # uploaded_files = info.context.FILES["0"]
-        # uploaded_files = info.context.FILES.get(files)
-        # do something with your file
-
-        return UploadFiles(ok=True)
+            # return self(ok=False, errors=get_errors(e))
+            return UploadFiles(ok=False)
 
 
 class Mutation(graphene.ObjectType):
-    # uploadFiles = UploadFiles.Field()
     uploadFiles = UploadFiles.Field()
     removeFile = RemoveFile.Field()

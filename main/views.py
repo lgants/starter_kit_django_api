@@ -82,29 +82,76 @@ class ModifiedGraphQLView(GraphQLView):
     # graphiql_template = 'graphiql.html'
     # import pdb; pdb.set_trace()
 
+    # @staticmethod
+    # def get_graphql_params(request, data):
+    #     # print("data", data['operationName'])
+    #     request_type = request.META.get("CONTENT_TYPE", '')
+    #     # import pdb; pdb.set_trace()
+    #
+    #     print("request_type", request_type)
+    #     print("request", request)
+    #     # print("request._post", request._post)
+    #     print("data", data)
+    #
+    #     if "multipart/form-data" in request_type:
+    #         _data = json.loads(request._post.get("operations"))
+    #
+    #         query, variables, operation_name, id = super(ModifiedGraphQLView, ModifiedGraphQLView).get_graphql_params(request, _data)
+    #         # operations = data.get('operations')
+    #         # files_map = data.get('map', "{}")
+    #
+    #         # import pdb; pdb.set_trace()
+    #         operations = request._post.get("operations")
+    #         files_map = request._post.get("map", "{}")
+    #
+    #
+    #         try:
+    #             operations = json.loads(operations)
+    #             files_map = json.loads(files_map)
+    #
+    #             variables = operations.get('variables')
+    #             for file_key in files_map:
+    #                 # file key is which file it is in the form-data
+    #                 file_instances = files_map[file_key]
+    #                 # pp.pprint(file_instances)
+    #                 for file_instance in file_instances:
+    #                     # print('file_instance')
+    #                     # pp.pprint(file_instance)
+    #                     test = obj_set(operations, file_instance, file_key, False)
+    #
+    #             query = operations.get('query')
+    #             variables = operations.get('variables')
+    #
+    #         except Exception as e:
+    #             raise e
+    #             # raise HttpError(HttpResponseBadRequest('Operations are invalid JSON.'))
+    #
+    #     else:
+    #         query, variables, operation_name, id = super(ModifiedGraphQLView, ModifiedGraphQLView).get_graphql_params(request, data)
+    #
+    #
+    #     # Example Request Body
+    #     # {'map': '{"0":["variables.file"]}',
+    #     #  'operations': '{"query":"mutation ($file: Upload!) {\\n  '
+    #     #                'uploadImageTest(file: $file) {\\n    success\\n    '
+    #     #                '__typename\\n  }\\n}\\n","variables":{}}'}
+    #     #
+    #     # Need to maybe map the map into the variables for files so that way the
+    #     # resolver knows which file on the multipart form to access
+    #     # import pdb; pdb.set_trace()
+    #
+    #
+    #     return query, variables, operation_name, id
     @staticmethod
     def get_graphql_params(request, data):
-        # print("data", data['operationName'])
         request_type = request.META.get("CONTENT_TYPE", '')
 
-        print("request_type", request_type)
-        print("request", request)
-        # print("request._post", request._post)
-        print("data", data)
-
-
         if "multipart/form-data" in request_type:
-            # print("req.body", request.body)
-
             _data = json.loads(request._post.get("operations"))
 
             query, variables, operation_name, id = super(ModifiedGraphQLView, ModifiedGraphQLView).get_graphql_params(request, _data)
-            # operations = data.get('operations')
-            # files_map = data.get('map', "{}")
-
-            operations = request._post.get("operations")
-            files_map = request._post.get("map", "{}")
-
+            operations = request._post.get('operations')
+            files_map = request._post.get('map', "{}")
 
             try:
                 operations = json.loads(operations)
@@ -120,15 +167,14 @@ class ModifiedGraphQLView(GraphQLView):
                         # pp.pprint(file_instance)
                         test = obj_set(operations, file_instance, file_key, False)
 
-
                 query = operations.get('query')
                 variables = operations.get('variables')
-
 
             except Exception as e:
                 raise e
                 # raise HttpError(HttpResponseBadRequest('Operations are invalid JSON.'))
 
+            return query, variables, operation_name, id
         else:
             query, variables, operation_name, id = super(ModifiedGraphQLView, ModifiedGraphQLView).get_graphql_params(request, data)
 
@@ -140,7 +186,6 @@ class ModifiedGraphQLView(GraphQLView):
         #
         # Need to maybe map the map into the variables for files so that way the
         # resolver knows which file on the multipart form to access
-        # import pdb; pdb.set_trace()
 
 
         return query, variables, operation_name, id

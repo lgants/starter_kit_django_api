@@ -3,6 +3,7 @@ import main.users.schema
 import main.upload.schema
 import main.counters.schema
 import main.posts.schema
+# from main.upload.schema import Upload
 
 class RootQuery(
     main.users.schema.Query,
@@ -30,5 +31,6 @@ class RootSubscription(
 schema = graphene.Schema(
     query=RootQuery,
     mutation=RootMutation,
-    subscription=RootSubscription
+    subscription=RootSubscription,
+    # types=[Upload]
 )
