@@ -96,7 +96,6 @@ class ModifiedGraphQLView(GraphQLView):
         if "multipart/form-data" in request_type:
             # print("req.body", request.body)
 
-
             _data = json.loads(request._post.get("operations"))
 
             query, variables, operation_name, id = super(ModifiedGraphQLView, ModifiedGraphQLView).get_graphql_params(request, _data)
@@ -107,14 +106,9 @@ class ModifiedGraphQLView(GraphQLView):
             files_map = request._post.get("map", "{}")
 
 
-
-
-
-
             try:
                 operations = json.loads(operations)
                 files_map = json.loads(files_map)
-
 
                 variables = operations.get('variables')
                 for file_key in files_map:
@@ -129,6 +123,7 @@ class ModifiedGraphQLView(GraphQLView):
 
                 query = operations.get('query')
                 variables = operations.get('variables')
+
 
             except Exception as e:
                 raise e
@@ -145,6 +140,8 @@ class ModifiedGraphQLView(GraphQLView):
         #
         # Need to maybe map the map into the variables for files so that way the
         # resolver knows which file on the multipart form to access
+        # import pdb; pdb.set_trace()
+
 
         return query, variables, operation_name, id
 
