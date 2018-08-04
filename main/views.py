@@ -77,6 +77,151 @@ class BatchEnabledGraphQLView(GraphQLView):
         return result, status_code
 
 
+class NewGraphQLView(GraphQLView):
+    def __init__(self, **kwargs):
+        # kwargs.update({'batch':True})
+        super(NewGraphQLView, self).__init__(**kwargs)
+
+    # @staticmethod
+    # def get_graphql_params(request, data):
+    #     request_type = request.META.get("CONTENT_TYPE", '')
+    #
+    #     if "multipart/form-data" in request_type:
+    #         import pdb; pdb.set_trace()
+
+    # def dispatch(self, request, *args, **kwargs):
+    #     try:
+    #         if request.method.lower() not in ("get", "post"):
+    #             raise HttpError(
+    #                 HttpResponseNotAllowed(
+    #                     ["GET", "POST"], "GraphQL only supports GET and POST requests."
+    #                 )
+    #             )
+    #
+    #         data = self.parse_body(request)
+    #         show_graphiql = self.graphiql and self.can_display_graphiql(request, data)
+    #
+    #         if "multipart/form-data" in request_type:
+    #             import pdb; pdb.set_trace()
+    #
+    #         if self.batch:
+    #             responses = [self.get_response(request, entry) for entry in data]
+    #             result = "[{}]".format(
+    #                 ",".join([response[0] for response in responses])
+    #             )
+    #             status_code = (
+    #                 responses
+    #                 and max(responses, key=lambda response: response[1])[1]
+    #                 or 200
+    #             )
+    #         else:
+    #             result, status_code = self.get_response(request, data, show_graphiql)
+    #
+    #         if show_graphiql:
+    #             query, variables, operation_name, id = self.get_graphql_params(
+    #                 request, data
+    #             )
+    #             return self.render_graphiql(
+    #                 request,
+    #                 graphiql_version=self.graphiql_version,
+    #                 query=query or "",
+    #                 variables=json.dumps(variables) or "",
+    #                 operation_name=operation_name or "",
+    #                 result=result or "",
+    #             )
+    #
+    #         return HttpResponse(
+    #             status=status_code, content=result, content_type="application/json"
+    #         )
+    #
+    #     except HttpError as e:
+    #         response = e.response
+    #         response["Content-Type"] = "application/json"
+    #         response.content = self.json_encode(
+    #             request, {"errors": [self.format_error(e)]}
+    #         )
+    #         return response
+
+    # def get_response(self, request, data, show_graphiql=False):
+    #     query, variables, operation_name, id = self.get_graphql_params(request, data)
+    #
+    #     request_type = request.META.get("CONTENT_TYPE", '')
+    #
+    #     if "multipart/form-data" in request_type:
+    #         import pdb; pdb.set_trace()
+    #
+    #
+    #     execution_result = self.execute_graphql_request(
+    #         request, data, query, variables, operation_name, show_graphiql
+    #     )
+    #
+    #     status_code = 200
+    #     if execution_result:
+    #         response = {}
+    #
+    #         if execution_result.errors:
+    #             response["errors"] = [
+    #                 self.format_error(e) for e in execution_result.errors
+    #             ]
+    #
+    #         if execution_result.invalid:
+    #             status_code = 400
+    #         else:
+    #             response["data"] = execution_result.data
+    #
+    #         if self.batch:
+    #             response["id"] = id
+    #             response["status"] = status_code
+    #
+    #         result = self.json_encode(request, response, pretty=show_graphiql)
+    #     else:
+    #         result = None
+    #
+    #     return result, status_code
+
+    def parse_body(self, request):
+        content_type = self.get_content_type(request)
+
+        if content_type == "application/graphql":
+            return {"query": request.body.decode()}
+
+        elif content_type == "application/json":
+            # noinspection PyBroadException
+            try:
+                body = request.body.decode("utf-8")
+            except Exception as e:
+                raise HttpError(HttpResponseBadRequest(str(e)))
+
+            try:
+                request_json = json.loads(body)
+                if self.batch:
+                    assert isinstance(request_json, list), (
+                        "Batch requests should receive a list, but received {}."
+                    ).format(repr(request_json))
+                    assert (
+                        len(request_json) > 0
+                    ), "Received an empty list in the batch request."
+                else:
+                    assert isinstance(
+                        request_json, dict
+                    ), "The received data is not a valid JSON query."
+                return request_json
+            except AssertionError as e:
+                raise HttpError(HttpResponseBadRequest(str(e)))
+            except (TypeError, ValueError):
+                raise HttpError(HttpResponseBadRequest("POST body sent invalid JSON."))
+
+        elif content_type in [
+            "application/x-www-form-urlencoded",
+            "multipart/form-data",
+        ]:
+            # import pdb; pdb.set_trace()
+            request_json = json.loads(body)
+            body = request.POST.get('operations')
+            return request.POST
+
+        return {}
+
 
 class ModifiedGraphQLView(GraphQLView):
     # graphiql_template = 'graphiql.html'

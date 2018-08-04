@@ -70,7 +70,10 @@ class UploadFiles(graphene.Mutation):
     # def mutate(cls, context, info, **input):
     # @classmethod
     # @classmethod
-    def mutate(self, info, files, **kwargs):
+    # def mutate(self, info, files, **kwargs):
+    def mutate(self, info, *args, **kwargs):
+        # import pdb; pdb.set_trace()
+        # print('info', info)
         try:
             for key, f in info.context.FILES.items():
                 path = os.path.join(settings.MEDIA_ROOT, f.name)
