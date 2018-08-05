@@ -19,24 +19,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
-# from main.counters.views import MyView
-from .views import BatchEnabledGraphQLView, NewGraphQLView, schema_view
-from .NewViews import NewestGraphQLView, ModifiedGraphQLView
 from .schema import schema
-from ._views import MyGraphQLView
+from .views import MyGraphQLView, schema_view
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    # url(r'^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
-    # url(r'^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True)))
-    url(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     url(r'^schema', csrf_exempt(schema_view)),
-    # url(r'^graphql', csrf_exempt(ModifiedGraphQLView.as_view(batch=True))),
+    url(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     url(r'^graphql', csrf_exempt(MyGraphQLView.as_view(batch=True))),
-    # url(r'^graphql', csrf_exempt(NewestGraphQLView.as_view(batch=True))),
-    # url(r'^graphql', csrf_exempt(GraphQLView.as_view(batch=True))),
-    # url(r'^graphql', csrf_exempt(NewGraphQLView.as_view(batch=True))),
-    # url(r'^graphql', csrf_exempt(BatchEnabledGraphQLView.as_view())),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # NOTE: this is not suitable for serving static files in production
