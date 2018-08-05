@@ -63,25 +63,23 @@ class UploadFiles(graphene.Mutation):
         # files = graphene.List(Upload)
         files = graphene.Argument(graphene.List(Upload))
 
-    # success = graphene.Boolean()
     ok = graphene.Boolean()
 
     # def mutate(self, info, file, **kwargs):
     # def mutate(cls, context, info, **input):
     # @classmethod
-    # @classmethod
-    # def mutate(self, info, files, **kwargs):
     def mutate(self, info, *args, **kwargs):
-        # import pdb; pdb.set_trace()
-        # print('info', info)
         try:
             for key, f in info.context.FILES.items():
+                url = settings.MEDIA_URL + f.name
                 path = os.path.join(settings.MEDIA_ROOT, f.name)
+                # TODO: might need to escape file names
+                # TODO: might want to integrate with remote cdn (i.e. Amazon CloudFront)
                 with open(path, 'wb+') as destination:
                     for chunk in f.chunks():
                         destination.write(chunk)
 
-                # UploadModel.objects.create(name=f.name, type=f.content_type, size=f.size, path=path)
+                UploadModel.objects.create(name=f.name, type=f.content_type, size=f.size, path=url)
             return UploadFiles(ok=True)
         except Exception as e:
             # return self(ok=False, errors=get_errors(e))
