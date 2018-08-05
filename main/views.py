@@ -27,6 +27,7 @@ class MyGraphQLView(ModifiedGraphQLView):
     def dispatch(self, request, *args, **kwargs):
         request_type = request.META.get("CONTENT_TYPE", '')
 
+        # NOTE: need to overwrite inherited dispatch func and handle explicitly if multipart since batch=True incorrectly treats multipart as a batch request
         if "multipart/form-data" in request_type:
             try:
                 if request.method.lower() not in ("get", "post"):
