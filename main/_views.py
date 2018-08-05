@@ -1,41 +1,47 @@
 from django.http import HttpResponse, HttpResponseNotAllowed
-from django.http.response import HttpResponseBadRequest
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.csrf import csrf_exempt
-
-
-from graphene_django.views import GraphQLView
-import json
+from graphene_django.views import GraphQLView, HttpError
 import graphene
-
-
-class HttpError(Exception):
-    def __init__(self, response, message=None, *args, **kwargs):
-        self.response = response
-        self.message = message = message or response.content.decode()
-        super(HttpError, self).__init__(message, *args, **kwargs)
+import json
 
 class MyGraphQLView(GraphQLView):
     def __init__(self, **kwargs):
-        self.multipart = True
-        # kwargs.update({'batch': True})
         super(MyGraphQLView, self).__init__(**kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         request_type = request.META.get("CONTENT_TYPE", '')
 
         if "multipart/form-data" in request_type:
-
             try:
+                if request.method.lower() not in ("get", "post"):
+                    raise HttpError(
+                        HttpResponseNotAllowed(
+                            ["GET", "POST"], "GraphQL only supports GET and POST requests."
+                        )
+                    )
+
                 data = self.parse_body(request)
                 show_graphiql = self.graphiql and self.can_display_graphiql(request, data)
 
                 result, status_code = self.get_response(request, data, show_graphiql)
 
+                if show_graphiql:
+                    query, variables, operation_name, id = self.get_graphql_params(
+                        request, data
+                    )
+
+                    return self.render_graphiql(
+                        request,
+                        graphiql_version=self.graphiql_version,
+                        query=query or "",
+                        variables=json.dumps(variables) or "",
+                        operation_name=operation_name or "",
+                        result=result or "",
+                    )
+
                 return HttpResponse(
                     status=status_code, content=result, content_type="application/json"
                 )
+
             except HttpError as e:
                 response = e.response
                 response["Content-Type"] = "application/json"
