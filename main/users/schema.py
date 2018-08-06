@@ -1,6 +1,7 @@
 from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
 from .models import (User, UserProfile, AuthCertificate, AuthFacebook, AuthGithub, AuthGoogle, AuthLinkedin)
+from main.helpers import get_object
 import graphene
 
 
@@ -60,80 +61,88 @@ class UserType(DjangoObjectType):
         model = User
 
 
-# class UserPayload(graphene.ObjectType):
-#     user = graphene.Field(User)
-#     # errors: [FieldError!] ???
-#
-#
-# class OrderByUserInput(graphene.InputObjectType):
-#     # id | username | role | isActive | email
-#     column = graphene.String()
-#     # asc | desc
-#     order = graphene.String()
-#
-#
-# class FilterUserInput(graphene.InputObjectType):
-#     # search by username or email
-#     searchText = graphene.String()
-#     # filter by role
-#     role = graphene.String()
-#     # filter by isActive
-#     isActive = graphene.Boolean()
-#
-# class AuthCertificateInput(graphene.InputObjectType):
-#     serial = graphene.String() #serial: String
-#
-# class AuthFacebookInput(graphene.InputObjectType):
-#     fbId = graphene.String() #fbId: String
-#     displayName = graphene.String() #displayName: String
-#
-# class AuthGithubInput(graphene.InputObjectType):
-#     ghId = graphene.String() #ghId: String
-#     displayName = graphene.String() #displayName: String
-#
-# class AuthGoogleInput(graphene.InputObjectType):
-#     googleId = graphene.String() #googleId: String
-#     displayName = graphene.String() #displayName: String
-#
-# class AuthLinkedinInput(graphene.InputObjectType):
-#     lnId = graphene.String() #lnId: String
-#     displayName = graphene.String() #displayName: String
-#
-# class AuthInput(graphene.InputObjectType):
-#     certificate = AuthCertificateInput #certificate: AuthCertificateInput
-#     facebook = AuthFacebookInput #facebook: AuthFacebookInput
-#     google = AuthGoogleInput #google: AuthGoogleInput
-#     github = AuthGitHubInput #github: AuthGitHubInput
-#     linkedin = AuthLinkedInInput #linkedin: AuthLinkedInInput
-#
-# class ProfileInput(graphene.InputObjectType):
-#     firstName = graphene.String()
-#     lastName = graphene.String()
-#
-# class AddUserInput(graphene.InputObjectType):
-#     username = graphene.String() #username: String!
-#     email = graphene.String()  #email: String!
-#     password = graphene.String() #password: String!
-#     role = graphene.String() #role: String!
-#     isActive = graphene.Boolean() #isActive: Boolean
-#     profile = ProfileInput #profile: ProfileInput
-#     auth = AuthInput #auth: AuthInput
-#
-#
-# class EditUserInput(graphene.InputObjectType):
-#     id = graphene.Int() #id: Int!
-#     username = graphene.String() #username: String!
-#     role = graphene.String() #role: String!
-#     isActive = graphene.Boolean() #isActive: Boolean
-#     email = graphene.String()  #email: String!
-#     password = graphene.String()
-#     profile: ProfileInput
-#     auth: AuthInput
-#
-#
-# class UpdateUserPayload(graphene.ObjectType):
-#     mutation = graphene.String() #mutation: String!
-#     node = User #node: User!
+
+class UserPayload(graphene.ObjectType):
+    user = graphene.Field(User)
+    # errors: [FieldError!] ???
+
+
+class OrderByUserInput(graphene.InputObjectType):
+  # # id | username | role | isActive | email
+  column = graphene.String() # column: String
+  # # asc | desc
+  order = graphene.String() # order: String
+
+
+class FilterUserInput(graphene.InputObjectType):
+    # # search by username or email
+    searchText = graphene.String() # searchText: String
+    # # filter by role
+    role = graphene.String() # role: String
+    # # filter by isActive
+    isActive = graphene.Boolean() # isActive: Boolean
+
+
+class AuthCertificateInput(graphene.InputObjectType):
+    serial = graphene.String() # serial: String
+
+
+class AuthFacebookInput(graphene.InputObjectType):
+    fbId = graphene.String() # fbId: String
+    displayName = graphene.String() # displayName: String
+
+
+class AuthGoogleInput(graphene.InputObjectType):
+    googleId = graphene.String() # googleId: String
+    displayName = graphene.String() # displayName: String
+
+
+class AuthGitHubInput(graphene.InputObjectType):
+    ghId = graphene.String() # ghId: String
+    displayName = graphene.String() # displayName: String
+
+
+class AuthLinkedInInput(graphene.InputObjectType):
+    lnId = graphene.String() # lnId: String
+    displayName = graphene.String() # displayName: String
+
+
+class AuthInput(graphene.InputObjectType):
+    certificate = AuthCertificateInput #certificate: AuthCertificateInput
+    facebook = AuthFacebookInput #facebook: AuthFacebookInput
+    google = AuthGoogleInput #google: AuthGoogleInput
+    github = AuthGitHubInput #github: AuthGitHubInput
+    linkedin = AuthLinkedInInput #linkedin: AuthLinkedInInput
+
+
+class ProfileInput(graphene.InputObjectType):
+    firstName = graphene.String()
+    lastName = graphene.String()
+
+
+class AddUserInput(graphene.InputObjectType):
+    username = graphene.String(required=True) # username: String!
+    email = graphene.String(required=True) # email: String!
+    password = graphene.String(required=True) # password: String!
+    role = graphene.String(required=True) # role: String!
+    isActive = graphene.Boolean() # isActive: Boolean
+    profile = ProfileInput # profile: ProfileInput
+    auth = AuthInput # auth: AuthInput
+
+class EditUserInput(graphene.InputObjectType):
+    id = graphene.Int() #id: Int!
+    username = graphene.String() #username: String!
+    role = graphene.String() #role: String!
+    isActive = graphene.Boolean() #isActive: Boolean
+    email = graphene.String()  #email: String!
+    password = graphene.String()
+    profile: ProfileInput
+    auth: AuthInput
+
+
+class UpdateUserPayload(graphene.ObjectType):
+    mutation = graphene.String(required=True) #mutation: String!
+    node = User #node: User!
 
 
 class Query(graphene.ObjectType):
@@ -143,12 +152,11 @@ class Query(graphene.ObjectType):
     current_user = graphene.Field(UserType, id=graphene.Int())
 
     def resolve_current_user(self, info, **kwargs):
-        return User.objects.all().first()
-        # return None
+        return None
+        # return get_object(User, kwargs['id'])
 
     def resolve_user(self, info, **kwargs):
-        # return User.objects.all().first()
-        return None
+        return get_object(User, kwargs['id'])
 
     def resolve_users(self, info, **kwargs):
         # import pdb; pdb.set_trace()
