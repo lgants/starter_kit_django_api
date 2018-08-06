@@ -1,9 +1,9 @@
 import graphene
 import main.users.schema
+import main.users.access.schema
 import main.upload.schema
 import main.counters.schema
 import main.posts.schema
-# from main.upload.schema import Upload
 
 class RootQuery(
     main.users.schema.Query,
@@ -14,6 +14,7 @@ class RootQuery(
     pass
 
 class RootMutation(
+    main.users.access.schema.Mutation,
     main.counters.schema.Mutation,
     main.upload.schema.Mutation,
     main.posts.schema.Mutation,

@@ -47,9 +47,10 @@ THIRD_PARTY_APPS = (
 )
 
 LOCAL_APPS = (
+    # 'main.users.authentication',
+    'main.users.access',
     'main.users',
     'main.upload',
-    'main.users.authentication',
     'main.posts',
     'main.counters',
 )
