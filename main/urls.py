@@ -28,5 +28,6 @@ urlpatterns = [
     url(r'^schema', csrf_exempt(schema_view)),
     url(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     url(r'^graphql', csrf_exempt(MyGraphQLView.as_view(batch=True))),
+    # url(r'^graphql', csrf_exempt(GraphQLView.as_view(batch=True))),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # NOTE: this is not suitable for serving static files in production

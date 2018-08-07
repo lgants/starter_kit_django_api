@@ -32,6 +32,6 @@ class RootSubscription(
 schema = graphene.Schema(
     query=RootQuery,
     mutation=RootMutation,
-    subscription=RootSubscription,
+    # subscription=RootSubscription,
     # types=[Upload]
 )
