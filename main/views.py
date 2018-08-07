@@ -25,7 +25,6 @@ class MyGraphQLView(ModifiedGraphQLView):
         super(MyGraphQLView, self).__init__(**kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        import pdb; pdb.set_trace()
         request_type = request.META.get("CONTENT_TYPE", '')
 
         # NOTE: need to overwrite inherited dispatch func and handle explicitly if multipart since batch=True incorrectly treats multipart as a batch request

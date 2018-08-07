@@ -63,7 +63,7 @@ class UserType(DjangoObjectType):
 
 
 class UserPayload(graphene.ObjectType):
-    user = graphene.Field(User)
+    user = graphene.Field(UserType)
     # errors: [FieldError!] ???
 
 
