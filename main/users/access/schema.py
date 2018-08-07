@@ -1,6 +1,7 @@
 from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
 from main.users.models import User
+from main.users.schema import UserType
 from main.helpers import get_object, update_or_create, get_errors
 import graphene
 
@@ -10,17 +11,24 @@ class Tokens(graphene.ObjectType):
     accessToken = graphene.String()
     refreshToken = graphene.String()
 
+    def resolve_accessToken(self, info, **kwargs):
+        return None
+
+    def resolve_refreshToken(self, info, **kwargs):
+        return None
+
 
 class AuthPayload(graphene.ObjectType):
-    user = graphene.Field(User)
-    tokens = graphene.Field(Tokens) # might be a list
+    user = graphene.Field(UserType)
+    tokens = graphene.List(Tokens) # might be a list
     # errors: [FieldError!] # ???
 
+    def resolve_user(self, info, **kwargs):
+        return User.objects.first()
 
-class LoginUserInput(graphene.InputObjectType):
-    usernameOrEmail = graphene.String(required=True)
-    password = graphene.String(required=True)
-
+    def resolve_tokens(self, info, **kwargs):
+        return ["asdf"]
+        
 #
 # class ForgotPasswordInput(graphene.InputObjectType):
 #     email = graphene.String()
@@ -42,17 +50,40 @@ class LoginUserInput(graphene.InputObjectType):
 #     # errors: [FieldError!] # ???
 #     pass
 
+
+
+class LoginUserInput(graphene.InputObjectType):
+    usernameOrEmail = graphene.String(required=True)
+    password = graphene.String(required=True)
+
+# class CreatePerson(graphene.Mutation):
+#     class Arguments:
+#         person_data = PersonInput(required=True)
+#
+#     person = graphene.Field(Person)
+
+
+
+
 class Login(graphene.Mutation):
     class Arguments:
-        #   login(input: LoginUserInput!): AuthPayload!
-        # input = graphene.Argument(LoginUserInput(required=True))
+        # person_data = PersonInput(required=True)
         input = LoginUserInput(required=True)
+        # password = graphene.String
+        #   login(input: LoginUserInput!): AuthPayload!
+        # input = graphene.Argument(LoginUserInput)
+        # input = LoginUserInput(required=True)
 
-    # AuthPayload = graphene.Field(AuthPayload)
+    AuthPayload = graphene.Field(AuthPayload)
 
-    @classmethod
-    def mutate(cls, context, info, **input):
+    @staticmethod
+    def mutate(root, info, **kwargs):
         return None
+
+    # @classmethod
+    # def mutate(cls, context, info, **input):
+    #     # return AuthPayload
+    #     return cls(user=User.objects.first())
 
 # class ForgotPassword(graphene.Mutation):
 #     class Arguments:
@@ -93,4 +124,3 @@ class Mutation(graphene.ObjectType):
     # resetPassword = ResetPassword.Field()
     # # Register user
     # register = Register.Field()
-    pass
