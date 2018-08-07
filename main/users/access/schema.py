@@ -12,10 +12,10 @@ class Tokens(graphene.ObjectType):
     refreshToken = graphene.String()
 
     def resolve_accessToken(self, info, **kwargs):
-        return None
+        return "asdfadsfasdf"
 
     def resolve_refreshToken(self, info, **kwargs):
-        return None
+        return "asdfasdf"
 
 
 class AuthPayload(graphene.ObjectType):
@@ -28,8 +28,8 @@ class AuthPayload(graphene.ObjectType):
 
     def resolve_tokens(self, info, **kwargs):
         return ["asdf"]
-        
-#
+
+
 # class ForgotPasswordInput(graphene.InputObjectType):
 #     email = graphene.String()
 #
@@ -76,14 +76,9 @@ class Login(graphene.Mutation):
 
     AuthPayload = graphene.Field(AuthPayload)
 
-    @staticmethod
-    def mutate(root, info, **kwargs):
-        return None
-
-    # @classmethod
-    # def mutate(cls, context, info, **input):
-    #     # return AuthPayload
-    #     return cls(user=User.objects.first())
+    @classmethod
+    def mutate(cls, context, info, **input):
+        return cls(AuthPayload)
 
 # class ForgotPassword(graphene.Mutation):
 #     class Arguments:
