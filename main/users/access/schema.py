@@ -2,19 +2,9 @@ from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
 from main.users.models import User
 from main.users.schema import UserType, UserPayload
+from main.common import FieldError
 from main.helpers import get_object, update_or_create, get_errors
 import graphene
-
-
-class FieldError(graphene.ObjectType):
-    field = graphene.String()
-    message = graphene.String()
-
-    def resole_field(self, info, **kwargs):
-        return "error"
-
-    def resole_message(self, info, **kwargs):
-        return "message"
 
 
 class Tokens(graphene.ObjectType):
@@ -34,7 +24,8 @@ class AuthPayload(graphene.ObjectType):
     errors = graphene.List(FieldError) # errors: [FieldError!]
 
     def resolve_user(self, info, **kwargs):
-        return User.objects.first()
+        # return User.objects.first()
+        return cls(user=info.context.user)
 
     def resolve_tokens(self, info, **kwargs):
         return ["asdf"]

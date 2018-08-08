@@ -2,6 +2,7 @@ from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
 from .models import (User, UserProfile, AuthCertificate, AuthFacebook, AuthGithub, AuthGoogle, AuthLinkedin)
 from main.helpers import get_object
+from main.common import FieldError
 import graphene
 
 
@@ -64,7 +65,14 @@ class UserType(DjangoObjectType):
 
 class UserPayload(graphene.ObjectType):
     user = graphene.Field(UserType)
-    # errors: [FieldError!] ???
+    errors = graphene.List(FieldError) # [FieldError!] ???
+
+    def resolve_user(self, info, **kwargs):
+        return User.objects.first()
+
+    def resolve_errors(self, info, **kwargs):
+        return []
+
 
 
 class OrderByUserInput(graphene.InputObjectType):
@@ -136,8 +144,8 @@ class EditUserInput(graphene.InputObjectType):
     isActive = graphene.Boolean() #isActive: Boolean
     email = graphene.String()  #email: String!
     password = graphene.String()
-    profile: ProfileInput
-    auth: AuthInput
+    profile = ProfileInput
+    auth = AuthInput
 
 
 class UpdateUserPayload(graphene.ObjectType):
