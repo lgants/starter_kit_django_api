@@ -113,13 +113,25 @@ class Register(graphene.Mutation):
     def mutate(cls, context, info, **input):
         return UserPayload
 
+class RefreshTokens(graphene.Mutation):
+    class Arguments:
+        # refreshTokens(refreshToken: String!): Tokens!
+        refresh_token = graphene.String(required=True)
+
+    Output = Tokens
+
+    @classmethod
+    def mutate(cls, context, info, **input):
+        return Tokens
 
 class Mutation(graphene.ObjectType):
-    # # Login user
+    # Login user
     login = Login.Field()
-    # # Forgot password
+    # Forgot password
     forgotPassword = ForgotPassword.Field()
-    # # Reset password
+    # Reset password
     resetPassword = ResetPassword.Field()
-    # # Register user
+    # Register user
     register = Register.Field()
+    # Refresh user tokens
+    refreshTokens = RefreshTokens.Field()
