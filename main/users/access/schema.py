@@ -24,11 +24,13 @@ class AuthPayload(graphene.ObjectType):
     errors = graphene.List(FieldError) # errors: [FieldError!]
 
     def resolve_user(self, info, **kwargs):
-        # return User.objects.first()
-        return cls(user=info.context.user)
+        get_object(User, kwargs['id'])
 
     def resolve_tokens(self, info, **kwargs):
-        return ["asdf"]
+        return [Tokens]
+
+    def resolve_errors(self, info, **kwargs):
+        return [FieldError]
 
 
 class ResetPayload(graphene.ObjectType):
@@ -104,6 +106,7 @@ class Register(graphene.Mutation):
     def mutate(cls, context, info, **input):
         return UserPayload
 
+
 class RefreshTokens(graphene.Mutation):
     class Arguments:
         # refreshTokens(refreshToken: String!): Tokens!
@@ -114,6 +117,12 @@ class RefreshTokens(graphene.Mutation):
     @classmethod
     def mutate(cls, context, info, **input):
         return Tokens
+
+
+class Logout(graphene.Mutation):
+    @classmethod
+    def mutate(cls, context, info, **input):
+        return None
 
 class Mutation(graphene.ObjectType):
     # Login user
@@ -126,3 +135,5 @@ class Mutation(graphene.ObjectType):
     register = Register.Field()
     # Refresh user tokens
     refreshTokens = RefreshTokens.Field()
+    # Logout user
+    logout = Login.Field()
