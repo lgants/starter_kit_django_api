@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+from django.urls import include
 from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
@@ -28,6 +29,7 @@ urlpatterns = [
     url(r'^schema', csrf_exempt(schema_view)),
     url(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     url(r'^graphql', csrf_exempt(MyGraphQLView.as_view(batch=True))),
+    url('', include('social_django.urls', namespace='social')),
     # url(r'^graphql', csrf_exempt(GraphQLView.as_view(batch=True))),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # NOTE: this is not suitable for serving static files in production

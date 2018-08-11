@@ -54,6 +54,7 @@ class UserAuthType(graphene.ObjectType):
 
 
 class UserType(DjangoObjectType):
+    # DjangoObjectType automatically includes fields on the model
     profile = graphene.Field(UserProfileType)
     auth = graphene.Field(UserAuthType)
 

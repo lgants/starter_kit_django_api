@@ -5,14 +5,18 @@ from main.users.schema import UserType, UserPayload
 from main.common import FieldError
 from main.helpers import get_object, update_or_create, get_errors
 import graphene
+import graphql_jwt
 
 
 class Tokens(graphene.ObjectType):
+    # accessToken = graphql_jwt.ObtainJSONWebToken.Field()
+    # refreshToken = graphql_jwt.Refresh.Field()
     accessToken = graphene.String()
     refreshToken = graphene.String()
 
     def resolve_accessToken(self, info, **kwargs):
-        return "asdfadsfasdf"
+        # ObtainJSONWebToken
+        return ""
 
     def resolve_refreshToken(self, info, **kwargs):
         return "asdfasdf"
@@ -24,13 +28,37 @@ class AuthPayload(graphene.ObjectType):
     errors = graphene.List(FieldError) # errors: [FieldError!]
 
     def resolve_user(self, info, **kwargs):
-        get_object(User, kwargs['id'])
+        # get_object(User, kwargs['id'])
+        # self.user contains the user info; not kwargs
+        return User.objects.first()
 
     def resolve_tokens(self, info, **kwargs):
+        # import pdb; pdb.set_trace()
+        # graphql_jwt.utils.
+
         return [Tokens]
 
     def resolve_errors(self, info, **kwargs):
         return [FieldError]
+
+
+# class AuthPayload(graphql_jwt.JSONWebTokenMutation):
+#     user = graphene.Field(UserType)
+#     # tokens = graphene.List(Tokens) # might be a list
+#     # errors = graphene.List(FieldError) # errors: [FieldError!]
+#
+#     @classmethod
+#     def resolve(cls, root, info):
+#         return cls(user=info.context.user)
+#
+#     # def resolve_user(self, info, **kwargs):
+#     #     get_object(User, kwargs['id'])
+#
+#     # def resolve_tokens(self, info, **kwargs):
+#     #     return [Tokens]
+#     #
+#     # def resolve_errors(self, info, **kwargs):
+#     #     return [FieldError]
 
 
 class ResetPayload(graphene.ObjectType):
@@ -54,7 +82,8 @@ class RegisterUserInput(graphene.InputObjectType):
 
 
 class LoginUserInput(graphene.InputObjectType):
-    usernameOrEmail = graphene.String(required=True)
+    username = graphene.String(required=True)
+    # usernameOrEmail = graphene.String(required=True)
     password = graphene.String(required=True)
 
 
@@ -68,7 +97,7 @@ class Login(graphene.Mutation):
 
     @classmethod
     def mutate(cls, context, info, **input):
-        return AuthPayload
+        return AuthPayload(user=User(**input['input']))
 
 
 class ForgotPassword(graphene.Mutation):
@@ -125,6 +154,9 @@ class Logout(graphene.Mutation):
         return None
 
 class Mutation(graphene.ObjectType):
+    # token_auth = graphql_jwt.ObtainJSONWebToken.Field()
+    # verify_token = graphql_jwt.Verify.Field()
+    # refresh_token = graphql_jwt.Refresh.Field()
     # Login user
     login = Login.Field()
     # Forgot password
