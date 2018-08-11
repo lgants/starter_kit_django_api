@@ -5,6 +5,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.conf import settings
 from graphene_file_upload import ModifiedGraphQLView
+from rest_social_auth.views import SocialSessionAuthView
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 import graphene
 import json
 import os
@@ -17,6 +20,14 @@ def schema_view(request, format=None):
         data=file.read()
     return Response(json.loads(data))
 
+
+class MySocialSessionAuthView(SocialSessionAuthView):
+    # def __init__(self, **kwargs):
+    #     super(MySocialSessionAuthView, self).__init__(**kwargs)
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        return super(MySocialSessionAuthView, self).post(request, *args, **kwargs)
 
 
 # NOTE: this works so leaving for reference, but will use the package
