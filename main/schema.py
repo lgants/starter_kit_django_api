@@ -14,6 +14,7 @@ class RootQuery(
     pass
 
 class RootMutation(
+    main.users.schema.Mutation,
     main.users.access.schema.Mutation,
     main.counters.schema.Mutation,
     main.upload.schema.Mutation,

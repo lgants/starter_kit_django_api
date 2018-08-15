@@ -63,15 +63,31 @@ class UserType(DjangoObjectType):
         model = User
 
 
+    # def resolve_profile(self, info, **kwargs):
+    #     pass
+    #
+    # def resolve_auth(self, info, **kwargs):
+    #     # self is user
+    #     # TODO: generate the auth tokens here  ???
+    #     # import pdb; pdb.set_trace()
+    #     pass
+
+
+
 
 class UserPayload(graphene.ObjectType):
     user = graphene.Field(UserType)
     errors = graphene.List(FieldError) # [FieldError!] ???
 
     def resolve_user(self, info, **kwargs):
-        return User.objects.first()
+        fields = [f.name for f in User._meta.get_fields()]
+        obj = self.user.__dict__
+        _user = {k: obj[k] for k in set(fields) & set(obj.keys())}
+
+        return User(**_user)
 
     def resolve_errors(self, info, **kwargs):
+        # check if user is valid with self.user
         return []
 
 
@@ -129,6 +145,7 @@ class ProfileInput(graphene.InputObjectType):
     lastName = graphene.String()
 
 
+# NOTE: this is used when signing up without external service
 class AddUserInput(graphene.InputObjectType):
     username = graphene.String(required=True) # username: String!
     email = graphene.String(required=True) # email: String!
@@ -170,3 +187,48 @@ class Query(graphene.ObjectType):
     def resolve_users(self, info, **kwargs):
         # import pdb; pdb.set_trace()
         return User.objects.all()
+
+
+class AddUser(graphene.Mutation):
+    class Arguments:
+        # addUser(input: AddUserInput!): UserPayload!
+        input = graphene.Argument(AddUserInput, required=True)
+
+    Output = UserPayload
+
+    @classmethod
+    def mutate(cls, context, info, **input):
+        return None
+
+
+class EditUser(graphene.Mutation):
+    class Arguments:
+        # editUser(input: EditUserInput!): UserPayload!
+        input = graphene.Argument(EditUserInput, required=True)
+
+    Output = UserPayload
+
+    @classmethod
+    def mutate(cls, context, info, **input):
+        return None
+
+
+class DeleteUser(graphene.Mutation):
+    class Arguments:
+        # deleteUser(id: Int!): UserPayload!
+        id = graphene.Int(required=True)
+
+    Output = UserPayload
+
+    @classmethod
+    def mutate(cls, context, info, **input):
+        return None
+
+
+class Mutation(graphene.ObjectType):
+    # Create new user
+    addUser = AddUser.Field()
+    # Edit a user
+    editUser = EditUser.Field()
+    # Delete a user
+    deleteUser = DeleteUser.Field()

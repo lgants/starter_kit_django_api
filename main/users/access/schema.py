@@ -90,7 +90,7 @@ class LoginUserInput(graphene.InputObjectType):
 class Login(graphene.Mutation):
     class Arguments:
         #   login(input: LoginUserInput!): AuthPayload!
-        input = graphene.Argument(LoginUserInput)
+        input = graphene.Argument(LoginUserInput, required=True)
         # input = LoginUserInput(required=True)
 
     Output = AuthPayload
@@ -103,7 +103,7 @@ class Login(graphene.Mutation):
 class ForgotPassword(graphene.Mutation):
     class Arguments:
         #   forgotPassword(input: ForgotPasswordInput!): String
-        input = graphene.Argument(ForgotPasswordInput)
+        input = graphene.Argument(ForgotPasswordInput, required=True)
 
     message = graphene.String()
 
@@ -115,7 +115,7 @@ class ForgotPassword(graphene.Mutation):
 class ResetPassword(graphene.Mutation):
     class Arguments:
         #   resetPassword(input: ResetPasswordInput!): ResetPayload!
-        input = graphene.Argument(ResetPasswordInput)
+        input = graphene.Argument(ResetPasswordInput, required=True)
 
     Output = ResetPayload
 
@@ -127,13 +127,14 @@ class ResetPassword(graphene.Mutation):
 class Register(graphene.Mutation):
     class Arguments:
         # register(input: RegisterUserInput!): UserPayload!
-        input = graphene.Argument(RegisterUserInput)
+        input = graphene.Argument(RegisterUserInput, required=True)
 
     Output = UserPayload
 
     @classmethod
     def mutate(cls, context, info, **input):
-        return UserPayload
+        return UserPayload(user=User(**input['input']))
+        # return UserPayload(user)
 
 
 class RefreshTokens(graphene.Mutation):

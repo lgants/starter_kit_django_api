@@ -35,7 +35,7 @@ DJANGO_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    # 'django.contrib.sessions',
+    'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 )
@@ -48,6 +48,7 @@ THIRD_PARTY_APPS = (
     'graphene_django',
     'social_django', # django social auth
     'rest_social_auth', # django rest social auth
+    'oauth2_provider',
 )
 
 LOCAL_APPS = (
@@ -192,6 +193,8 @@ SOCIAL_AUTH_PIPELINE = [
 ]
 
 SOCIAL_AUTH_USER_MODEL = 'users.User'
+
+REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI = 'http://localhost:3000/auth/github/callback'
 
 # SOCIAL_AUTH_GITHUB_LOGIN_URL = '/auth/github/callback'
 SOCIAL_AUTH_GITHUB_KEY = os.environ.get('SOCIAL_AUTH_GITHUB_KEY', default='')

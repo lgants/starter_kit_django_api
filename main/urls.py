@@ -29,10 +29,10 @@ urlpatterns = [
     url(r'^schema', csrf_exempt(schema_view)),
     url(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     url(r'^graphql', csrf_exempt(MyGraphQLView.as_view(batch=True))),
-    url(r'^api/login/', csrf_exempt(MySocialSessionAuthView.as_view())),
+    # url(r'^api/login/', csrf_exempt(MySocialSessionAuthView.as_view())),
     # url(r'^api/login/', include('rest_social_auth.urls_session')),
-    # url(r'^api/login/', include('rest_social_auth.urls_token')),
-    # url(r'^api/login/', include('rest_social_auth.urls_jwt')),
+    url(r'^api/login/', include('rest_social_auth.urls_token')),
+    url(r'^api/login/', include('rest_social_auth.urls_jwt')),
     # url('', include('social_django.urls', namespace='social')),
     # url(r'^graphql', csrf_exempt(GraphQLView.as_view(batch=True))),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
