@@ -187,6 +187,9 @@ class TokenMixin(object):
     def validate(cls, attrs):
         username_field = User.USERNAME_FIELD
 
+        print("attrs", attrs)
+        import pdb; pdb.set_trace()
+
         user = authenticate(**{
             username_field: attrs[username_field],
             'password': attrs['password'],
@@ -195,7 +198,8 @@ class TokenMixin(object):
         if user is None or not user.is_active:
             raise Exception('No active account found with the given credentials')
 
-        return {}
+        # return {}
+        return user
 
 
 class Token(TokenMixin, graphene.Mutation):
@@ -209,29 +213,36 @@ class Token(TokenMixin, graphene.Mutation):
         return RefreshToken.for_user(user)
 
     @classmethod
-    def validate(cls, attrs):
-        data = super(Token, cls).validate(attrs)
+    def aggregate(cls, attrs):
+        user = super(Token, cls).validate(attrs)
 
         refresh = cls.get_token(user)
 
+        import pdb; pdb.set_trace()
+
+        data = {}
         data['refresh'] = text_type(refresh)
         data['access'] = text_type(refresh.access_token)
 
-        return data
+        return data, user
 
     @classmethod
     def mutate(cls, context, info, **input):
         attrs = input['input']
-        data = cls.validate(attrs)
+        data, user = cls.aggregate(attrs)
+
+        import pdb; pdb.set_trace()
 
         # TODO: self is undefined
-        token = self.get_token(self.user)
+        token = cls.get_token(user)
 
 
         return Tokens
 
 
 class SocialAuth(SocialAuthMixin, graphene.Mutation):
+    # NOTE: WIP
+    # https://github.com/st4lk/django-rest-social-auth/blob/master/rest_social_auth/views.py
     social = graphene.Field(SocialType)
 
     # class Meta:
@@ -267,4 +278,4 @@ class Mutation(graphene.ObjectType):
 
     token = Token.Field()
 
-    authSocial = SocialAuth.Field()
+    socialAuth = SocialAuth.Field()

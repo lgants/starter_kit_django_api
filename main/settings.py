@@ -48,7 +48,7 @@ THIRD_PARTY_APPS = (
     'graphene_django',
     'social_django', # django social auth
     'rest_social_auth', # django rest social auth
-    'oauth2_provider',
+    # 'oauth2_provider',
 )
 
 LOCAL_APPS = (
@@ -64,7 +64,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 
 MIDDLEWARE = [
-    'main.disable.DisableCSRF',
+    # 'main.disable.DisableCSRF',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -143,7 +143,6 @@ SIMPLE_JWT = {
 
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.github.GithubOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
