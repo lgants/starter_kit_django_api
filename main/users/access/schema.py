@@ -15,6 +15,10 @@ from rest_framework_simplejwt.tokens import (
 )
 import graphene
 import graphql_jwt
+import graphql_social_auth
+from .decorators import social_auth
+from .mixins import SocialAuthMixin
+from .types import SocialType
 
 
 class Tokens(graphene.ObjectType):
@@ -227,6 +231,23 @@ class Token(TokenMixin, graphene.Mutation):
         return Tokens
 
 
+class SocialAuth(SocialAuthMixin, graphene.Mutation):
+    social = graphene.Field(SocialType)
+
+    # class Meta:
+    #     abstract = True
+
+    class Arguments:
+        provider = graphene.String(required=True)
+        access_token = graphene.String(required=True)
+
+    @classmethod
+    @social_auth
+    def mutate(cls, root, info, social, **kwargs):
+        return cls.resolve(root, info, social, **kwargs)
+
+
+
 class Mutation(graphene.ObjectType):
     # token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     # verify_token = graphql_jwt.Verify.Field()
@@ -245,3 +266,5 @@ class Mutation(graphene.ObjectType):
     logout = Login.Field()
 
     token = Token.Field()
+
+    authSocial = SocialAuth.Field()
