@@ -1,9 +1,18 @@
+from django.contrib.auth import authenticate
+from django.utils.six import text_type
 from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
+from graphene_django.rest_framework.mutation import SerializerMutation
 from main.users.models import User
 from main.users.schema import UserType, UserPayload
 from main.common import FieldError
 from main.helpers import get_object, update_or_create, get_errors
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer
+)
+from rest_framework_simplejwt.tokens import (
+    RefreshToken
+)
 import graphene
 import graphql_jwt
 
@@ -30,15 +39,18 @@ class AuthPayload(graphene.ObjectType):
     def resolve_user(self, info, **kwargs):
         # get_object(User, kwargs['id'])
         # self.user contains the user info; not kwargs
+        # add hook on User model to send email on User creation
         return User.objects.first()
 
     def resolve_tokens(self, info, **kwargs):
         # import pdb; pdb.set_trace()
         # graphql_jwt.utils.
+        # TODO: CREATE TOKENS HERE AND PASS AS ARG
 
         return [Tokens]
 
     def resolve_errors(self, info, **kwargs):
+        # check if user is valid else return errors
         return [FieldError]
 
 
@@ -154,6 +166,67 @@ class Logout(graphene.Mutation):
     def mutate(cls, context, info, **input):
         return None
 
+
+# class Token(SerializerMutation):
+#     class Meta:
+#         serializer_class = TokenObtainPairSerializer
+#
+#     Output = Tokens
+
+
+class TokenMixin(object):
+    @classmethod
+    def get_token(cls, user):
+        raise NotImplemented('Must implement `get_token` method for `TokenObtainSerializer` subclasses')
+
+    @classmethod
+    def validate(cls, attrs):
+        username_field = User.USERNAME_FIELD
+
+        user = authenticate(**{
+            username_field: attrs[username_field],
+            'password': attrs['password'],
+        })
+
+        if user is None or not user.is_active:
+            raise Exception('No active account found with the given credentials')
+
+        return {}
+
+
+class Token(TokenMixin, graphene.Mutation):
+    class Arguments:
+        input = graphene.Argument(LoginUserInput, required=True)
+
+    Output = Tokens
+
+    @classmethod
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
+
+    @classmethod
+    def validate(cls, attrs):
+        data = super(Token, cls).validate(attrs)
+
+        refresh = cls.get_token(user)
+
+        data['refresh'] = text_type(refresh)
+        data['access'] = text_type(refresh.access_token)
+
+        return data
+
+    @classmethod
+    def mutate(cls, context, info, **input):
+        attrs = input['input']
+        data = cls.validate(attrs)
+
+        # TODO: self is undefined
+        token = self.get_token(self.user)
+
+
+        return Tokens
+
+
 class Mutation(graphene.ObjectType):
     # token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     # verify_token = graphql_jwt.Verify.Field()
@@ -170,3 +243,5 @@ class Mutation(graphene.ObjectType):
     refreshTokens = RefreshTokens.Field()
     # Logout user
     logout = Login.Field()
+
+    token = Token.Field()
