@@ -84,12 +84,13 @@ class UserPayload(graphene.ObjectType):
     errors = graphene.List(FieldError) # [FieldError!] ???
 
     def resolve_user(self, info, **kwargs):
+        # import pdb; pdb.set_trace()
         # fields = [f.name for f in User._meta.get_fields()]
         # obj = self.user.__dict__
         # _user = {k: obj[k] for k in set(fields) & set(obj.keys())}
         #
         # return User(**_user)
-        return User.objects.first()
+        return self
 
     def resolve_errors(self, info, **kwargs):
         # check if user is valid with self.user
@@ -184,9 +185,10 @@ class Query(graphene.ObjectType):
 
     def resolve_user(self, info, **kwargs):
         # import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         # return UserPayload
-        # return get_object(User, kwargs['id'])
-        return User.objects.first()
+        # return User.objects.first()
+        return get_object(User, kwargs['id'])
 
     def resolve_users(self, info, **kwargs):
         # import pdb; pdb.set_trace()
