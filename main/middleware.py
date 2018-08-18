@@ -16,6 +16,13 @@ class JSONWebTokenMiddleware(MiddlewareMixin):
             import pdb; pdb.set_trace()
             if not hasattr(request, 'user') or request.user.is_anonymous:
 
+                header = request.META.get('HTTP_AUTHORIZATION')
+                token = header.split()[1]
+                token_backend.decode(token)
+
+
+
+
                 user = authenticate(request=request)
                 # try:
                 #     user = authenticate(request=request)

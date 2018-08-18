@@ -10,6 +10,8 @@ def get_object(model, id, otherwise=None):
     try:
         return model.objects.get(pk=id)
     except:
+    # except cls._meta.model.DoesNotExist:
+    #     return None
         return otherwise
 
 def update_or_create(instance, input, exception=['id']):

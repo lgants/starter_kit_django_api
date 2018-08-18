@@ -1,9 +1,13 @@
 from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
-from .models import (User, UserProfile, AuthCertificate, AuthFacebook, AuthGithub, AuthGoogle, AuthLinkedin)
+from .models import (UserProfile, AuthCertificate, AuthFacebook, AuthGithub, AuthGoogle, AuthLinkedin)
 from main.helpers import get_object
 from main.common import FieldError
+from django.contrib.auth import get_user_model
 import graphene
+
+
+User = get_user_model()
 
 
 class UserProfileType(DjangoObjectType):
@@ -80,11 +84,12 @@ class UserPayload(graphene.ObjectType):
     errors = graphene.List(FieldError) # [FieldError!] ???
 
     def resolve_user(self, info, **kwargs):
-        fields = [f.name for f in User._meta.get_fields()]
-        obj = self.user.__dict__
-        _user = {k: obj[k] for k in set(fields) & set(obj.keys())}
-
-        return User(**_user)
+        # fields = [f.name for f in User._meta.get_fields()]
+        # obj = self.user.__dict__
+        # _user = {k: obj[k] for k in set(fields) & set(obj.keys())}
+        #
+        # return User(**_user)
+        return User.objects.first()
 
     def resolve_errors(self, info, **kwargs):
         # check if user is valid with self.user
@@ -172,21 +177,29 @@ class UpdateUserPayload(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    user = graphene.Field(UserType, id=graphene.Int())
+    user = graphene.Field(UserPayload, id=graphene.Int())
     users = graphene.List(UserType)
 
-    current_user = graphene.Field(UserType, id=graphene.Int())
-
-    def resolve_current_user(self, info, **kwargs):
-        return None
-        # return get_object(User, kwargs['id'])
+    current_user = graphene.Field(UserType)
 
     def resolve_user(self, info, **kwargs):
-        return get_object(User, kwargs['id'])
+        # import pdb; pdb.set_trace()
+        # return UserPayload
+        # return get_object(User, kwargs['id'])
+        return User.objects.first()
 
     def resolve_users(self, info, **kwargs):
         # import pdb; pdb.set_trace()
         return User.objects.all()
+
+    def resolve_current_user(self, info, **kwargs):
+        # import pdb; pdb.set_trace()
+        if info.context.user.is_anonymous:
+        # if not info.context.user.is_authenticated()
+            # return User.objects.none()
+            return None
+        else:
+            return info.context.user
 
 
 class AddUser(graphene.Mutation):
