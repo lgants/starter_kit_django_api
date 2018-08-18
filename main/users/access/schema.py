@@ -31,8 +31,6 @@ User = get_user_model()
 
 
 class Tokens(graphene.ObjectType):
-    # accessToken = graphql_jwt.ObtainJSONWebToken.Field()
-    # refreshToken = graphql_jwt.Refresh.Field()
     accessToken = graphene.String()
     refreshToken = graphene.String()
 
@@ -45,25 +43,34 @@ class Tokens(graphene.ObjectType):
 
 class AuthPayload(graphene.ObjectType):
     user = graphene.Field(UserType)
-    tokens = graphene.List(Tokens) # might be a list
+    tokens = graphene.Field(Tokens) # might be a list
     errors = graphene.List(FieldError) # errors: [FieldError!]
 
     def resolve_user(self, info, **kwargs):
+
         # get_object(User, kwargs['id'])
         # self.user contains the user info; not kwargs
         # TODO: add hook on User model to send email on User creation
-        return User.objects.first()
+        return self.user
 
     def resolve_tokens(self, info, **kwargs):
         # import pdb; pdb.set_trace()
         # graphql_jwt.utils.
         # TODO: CREATE TOKENS HERE AND PASS AS ARG
 
-        return [Tokens]
+        # return [Tokens]
+        refresh = RefreshToken.for_user(self.user)
+        access = refresh.access_token
+
+        access_token = token_backend.encode(access.payload)
+        refresh_token = token_backend.encode(refresh.payload)
+
+        return Tokens(accessToken=access_token, refreshToken=refresh_token)
 
     def resolve_errors(self, info, **kwargs):
         # check if user is valid else return errors
-        return [FieldError]
+        # return [FieldError]
+        return None
 
 
 # class AuthPayload(graphql_jwt.JSONWebTokenMutation):
@@ -111,17 +118,17 @@ class LoginUserInput(graphene.InputObjectType):
     password = graphene.String(required=True)
 
 
-class Login(graphene.Mutation):
-    class Arguments:
-        #   login(input: LoginUserInput!): AuthPayload!
-        input = graphene.Argument(LoginUserInput, required=True)
-        # input = LoginUserInput(required=True)
-
-    Output = AuthPayload
-
-    @classmethod
-    def mutate(cls, context, info, **input):
-        return AuthPayload(user=User(**input['input']))
+# class Login(graphene.Mutation):
+#     class Arguments:
+#         #   login(input: LoginUserInput!): AuthPayload!
+#         input = graphene.Argument(LoginUserInput, required=True)
+#         # input = LoginUserInput(required=True)
+#
+#     Output = AuthPayload
+#
+#     @classmethod
+#     def mutate(cls, context, info, **input):
+#         return AuthPayload(user=User(**input['input']))
 
 
 class ForgotPassword(graphene.Mutation):
@@ -249,11 +256,11 @@ class Logout(graphene.Mutation):
 #         return Tokens
 
 
-class Token(graphene.Mutation):
+class Login(graphene.Mutation):
     class Arguments:
         input = graphene.Argument(LoginUserInput, required=True)
 
-    Output = Tokens
+    Output = AuthPayload
 
     @classmethod
     def mutate(cls, context, info, **input):
@@ -265,18 +272,12 @@ class Token(graphene.Mutation):
         })
 
         if user is None or not user.is_active:
-            raise serializers.ValidationError(
-                _('No active account found with given credentials'),
-            )
+            # raise serializers.ValidationError(
+            #     _('No active account found with given credentials'),
+            # )
+            pass
 
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
-
-        access_token = token_backend.encode(access.payload)
-        refresh_token = token_backend.encode(refresh.payload)
-
-
-        return Tokens(accessToken=access_token, refreshToken=refresh_token)
+        return AuthPayload(user=user)
 
 
 
@@ -316,6 +317,6 @@ class Mutation(graphene.ObjectType):
     # Logout user
     logout = Login.Field()
 
-    token = Token.Field()
+    # token = Token.Field()
 
     socialAuth = SocialAuth.Field()
