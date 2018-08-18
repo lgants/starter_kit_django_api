@@ -104,11 +104,11 @@ REST_FRAMEWORK = {
     #     'rest_framework.renderers.BrowsableAPIRenderer',
     # ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny'
-        # 'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.AllowAny'
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
         # 'graphql_jwt.backends.JSONWebTokenBackend',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
@@ -142,9 +142,9 @@ SIMPLE_JWT = {
 }
 
 
-AUTHENTICATION_BACKENDS = (
+AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-)
+]
 
 SOCIAL_AUTH_PIPELINE = [
     # Get the information we can about the user and return it in a simple
@@ -214,8 +214,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
+                # 'social_django.context_processors.backends',
+                # 'social_django.context_processors.login_redirect',
             ],
         },
     },

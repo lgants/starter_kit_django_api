@@ -3,7 +3,8 @@ from django.utils.six import text_type
 from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
 from graphene_django.rest_framework.mutation import SerializerMutation
-from main.users.models import User
+# from main.users.models import User
+from django.contrib.auth import get_user_model
 from main.users.schema import UserType, UserPayload
 from main.common import FieldError
 from main.helpers import get_object, update_or_create, get_errors
@@ -13,12 +14,20 @@ from rest_framework_simplejwt.serializers import (
 from rest_framework_simplejwt.tokens import (
     RefreshToken
 )
+from rest_framework_simplejwt.state import (
+    token_backend
+)
+from rest_framework_simplejwt.backends import (
+    TokenBackend
+)
 import graphene
 import graphql_jwt
 import graphql_social_auth
 from .decorators import social_auth
 from .mixins import SocialAuthMixin
 from .types import SocialType
+
+User = get_user_model()
 
 
 class Tokens(graphene.ObjectType):
@@ -28,11 +37,10 @@ class Tokens(graphene.ObjectType):
     refreshToken = graphene.String()
 
     def resolve_accessToken(self, info, **kwargs):
-        # ObtainJSONWebToken
-        return ""
+        return self.accessToken
 
     def resolve_refreshToken(self, info, **kwargs):
-        return "asdfasdf"
+        return self.refreshToken
 
 
 class AuthPayload(graphene.ObjectType):
@@ -43,7 +51,7 @@ class AuthPayload(graphene.ObjectType):
     def resolve_user(self, info, **kwargs):
         # get_object(User, kwargs['id'])
         # self.user contains the user info; not kwargs
-        # add hook on User model to send email on User creation
+        # TODO: add hook on User model to send email on User creation
         return User.objects.first()
 
     def resolve_tokens(self, info, **kwargs):
@@ -178,66 +186,98 @@ class Logout(graphene.Mutation):
 #     Output = Tokens
 
 
-class TokenMixin(object):
-    @classmethod
-    def get_token(cls, user):
-        raise NotImplemented('Must implement `get_token` method for `TokenObtainSerializer` subclasses')
+# class TokenMixin(object):
+#     @classmethod
+#     def get_token(cls, user):
+#         raise NotImplemented('Must implement `get_token` method for `TokenObtainSerializer` subclasses')
+#
+#     @classmethod
+#     def validate(cls, attrs):
+#         username_field = User.USERNAME_FIELD
+#
+#         print("attrs", attrs)
+#         # import pdb; pdb.set_trace()
+#
+#         # NOTE: MUST use get_user_model when creating users AND MUST set is_active on user to True
+#         user = authenticate(**{
+#             username_field: attrs[username_field],
+#             'password': attrs['password'],
+#         })
+#
+#         if user is None or not user.is_active:
+#             raise Exception('No active account found with the given credentials')
+#
+#         # return {}
+#         return user
 
-    @classmethod
-    def validate(cls, attrs):
-        username_field = User.USERNAME_FIELD
 
-        print("attrs", attrs)
-        import pdb; pdb.set_trace()
+# class Token(TokenMixin, graphene.Mutation):
+#     class Arguments:
+#         input = graphene.Argument(LoginUserInput, required=True)
+#
+#     Output = Tokens
+#
+#     @classmethod
+#     def get_token(cls, user):
+#         return RefreshToken.for_user(user)
+#
+#     @classmethod
+#     def aggregate(cls, attrs):
+#         user = super(Token, cls).validate(attrs)
+#
+#         refresh = cls.get_token(user)
+#
+#         import pdb; pdb.set_trace()
+#
+#         data = {}
+#         data['refresh'] = text_type(refresh)
+#         data['access'] = text_type(refresh.access_token)
+#
+#         return data, user
+#
+#     @classmethod
+#     def mutate(cls, context, info, **input):
+#         attrs = input['input']
+#         data, user = cls.aggregate(attrs)
+#
+#         import pdb; pdb.set_trace()
+#
+#         # TODO: self is undefined
+#         token = cls.get_token(user)
+#
+#
+#         return Tokens
 
-        user = authenticate(**{
-            username_field: attrs[username_field],
-            'password': attrs['password'],
-        })
 
-        if user is None or not user.is_active:
-            raise Exception('No active account found with the given credentials')
-
-        # return {}
-        return user
-
-
-class Token(TokenMixin, graphene.Mutation):
+class Token(graphene.Mutation):
     class Arguments:
         input = graphene.Argument(LoginUserInput, required=True)
 
     Output = Tokens
 
     @classmethod
-    def get_token(cls, user):
-        return RefreshToken.for_user(user)
-
-    @classmethod
-    def aggregate(cls, attrs):
-        user = super(Token, cls).validate(attrs)
-
-        refresh = cls.get_token(user)
-
-        import pdb; pdb.set_trace()
-
-        data = {}
-        data['refresh'] = text_type(refresh)
-        data['access'] = text_type(refresh.access_token)
-
-        return data, user
-
-    @classmethod
     def mutate(cls, context, info, **input):
-        attrs = input['input']
-        data, user = cls.aggregate(attrs)
+        username_field = User.USERNAME_FIELD
 
-        import pdb; pdb.set_trace()
+        user = authenticate(**{
+            username_field: input['input'][username_field],
+            'password': input['input']['password'],
+        })
 
-        # TODO: self is undefined
-        token = cls.get_token(user)
+        if user is None or not user.is_active:
+            raise serializers.ValidationError(
+                _('No active account found with given credentials'),
+            )
+
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+
+        access_token = token_backend.encode(access.payload)
+        refresh_token = token_backend.encode(refresh.payload)
 
 
-        return Tokens
+        return Tokens(accessToken=access_token, refreshToken=refresh_token)
+
 
 
 class SocialAuth(SocialAuthMixin, graphene.Mutation):
