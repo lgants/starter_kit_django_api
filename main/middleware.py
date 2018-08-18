@@ -11,8 +11,11 @@ class JSONWebTokenMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         # import pdb; pdb.set_trace()
+        # 'HTTP_AUTHORIZATION': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTM0NTcyNTM3LCJqdGkiOiJhZGE4YThhZWI0MDU0MmZkYjA5ZjJiNDAzMjRiMmMyNCIsInVzZXJfaWQiOjF9.tf8QnYjAbtCae_pDnyeB_TMmQo8Xoc_gHT0CSnE2osQ'
         if get_authorization_header(request) is not None:
+            import pdb; pdb.set_trace()
             if not hasattr(request, 'user') or request.user.is_anonymous:
+
                 user = authenticate(request=request)
                 # try:
                 #     user = authenticate(request=request)
