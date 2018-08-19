@@ -4,7 +4,7 @@ from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
 from graphene_django.rest_framework.mutation import SerializerMutation
 # from main.users.models import User
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login, logout
 from main.users.schema import UserType, UserPayload
 from main.common import FieldError
 from main.helpers import get_object, update_or_create, get_errors
@@ -183,6 +183,7 @@ class RefreshTokens(graphene.Mutation):
 class Logout(graphene.Mutation):
     @classmethod
     def mutate(cls, context, info, **input):
+        logout(info.context)
         return None
 
 
@@ -276,6 +277,8 @@ class Login(graphene.Mutation):
             #     _('No active account found with given credentials'),
             # )
             pass
+        else:
+            login(info.context, user)
 
         return AuthPayload(user=user)
 

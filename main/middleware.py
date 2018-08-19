@@ -12,6 +12,7 @@ class JSONWebTokenMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         if not hasattr(request, 'user') or request.user.is_anonymous:
+            user = None
             try:
                 user = authenticate(request)
             except:

@@ -71,7 +71,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'main.middleware.JSONWebTokenMiddleware', # my custom middleware for authentication
+    # 'main.middleware.JSONWebTokenMiddleware', # my custom middleware for authentication
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -99,10 +99,10 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_RENDERER_CLASSES': (
-    #     'rest_framework.renderers.JSONRenderer',
-    #     'rest_framework.renderers.BrowsableAPIRenderer',
-    # ),
+    'DEFAULT_RENDERER_CLASSES': (
+        # 'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
     'DEFAULT_PERMISSION_CLASSES': (
         # 'rest_framework.permissions.AllowAny'
         'rest_framework.permissions.IsAuthenticated',
@@ -111,7 +111,7 @@ REST_FRAMEWORK = {
         # 'rest_framework.authentication.TokenAuthentication',
         # 'graphql_jwt.backends.JSONWebTokenBackend',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),

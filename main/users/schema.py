@@ -195,13 +195,13 @@ class Query(graphene.ObjectType):
         return User.objects.all()
 
     def resolve_current_user(self, info, **kwargs):
-        # import pdb; pdb.set_trace()
-        if info.context.user.is_anonymous:
-        # if not info.context.user.is_authenticated()
-            # return User.objects.none()
-            return None
-        else:
-            return info.context.user
+        return info.context.user
+        # if info.context.user.is_anonymous:
+        # # if not info.context.user.is_authenticated()
+        #     # return User.objects.none()
+        #     return None
+        # else:
+        #     return info.context.user
 
 
 class AddUser(graphene.Mutation):
