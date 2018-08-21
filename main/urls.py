@@ -21,7 +21,7 @@ from django.contrib import admin
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 from .schema import schema
-from .views import MyGraphQLView, MySocialSessionAuthView, schema_view
+from .views import MyGraphQLView, MySocialSessionAuthView, schema_view, code_view
 
 
 urlpatterns = [
@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^schema', csrf_exempt(schema_view)),
     url(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     url(r'^graphql', csrf_exempt(MyGraphQLView.as_view(batch=True))),
+    url(r'^code', csrf_exempt(code_view)),
     # url(r'^api/login/', csrf_exempt(MySocialSessionAuthView.as_view())),
     # url(r'^api/login/', include('rest_social_auth.urls_session')),
     url(r'^api/login/', include('rest_social_auth.urls_token')),

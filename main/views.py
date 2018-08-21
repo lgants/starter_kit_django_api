@@ -11,6 +11,40 @@ from django.utils.decorators import method_decorator
 import graphene
 import json
 import os
+import requests
+import requests.auth
+from django.conf import settings
+
+def get_token(code):
+    client_auth = requests.auth.HTTPBasicAuth(
+        settings.SOCIAL_AUTH_GITHUB_KEY,
+        settings.SOCIAL_AUTH_GITHUB_SECRET)
+
+    post_data = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": settings.REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI
+    }
+
+    response = requests.post(
+        'https://github.com/login/oauth/access_token',
+        auth=client_auth,
+        data=post_data)
+
+    token_json = response.json()
+    return token_json["access_token"]
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny, ))
+def code_view(request, format=None):
+    import pdb; pdb.set_trace()
+
+    body = json.loads(request.body)
+
+    pass
+
+
 
 @api_view(['GET', 'POST'])
 @permission_classes((AllowAny, ))

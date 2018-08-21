@@ -118,6 +118,11 @@ class LoginUserInput(graphene.InputObjectType):
     password = graphene.String(required=True)
 
 
+class AuthenticateInput(graphene.InputObjectType):
+    provider = graphene.String(required=True)
+    code = graphene.String(required=True)
+
+
 # class Login(graphene.Mutation):
 #     class Arguments:
 #         #   login(input: LoginUserInput!): AuthPayload!
@@ -302,6 +307,20 @@ class SocialAuth(SocialAuthMixin, graphene.Mutation):
         return cls.resolve(root, info, social, **kwargs)
 
 
+class Authenticate(graphene.Mutation):
+    class Arguments:
+        input = graphene.Argument(AuthenticateInput)
+
+    Output = AuthPayload
+
+    @classmethod
+    def mutate(cls, context, info, **input):
+        # TODO ADD LOGIC HERE
+        # import pdb; pdb.set_trace()
+        # {'input': {'provider': 'github', 'code': '123456'}}
+        user = User.objects.all()[0]
+        return AuthPayload(user=user)
+
 
 class Mutation(graphene.ObjectType):
     # token_auth = graphql_jwt.ObtainJSONWebToken.Field()
@@ -323,3 +342,5 @@ class Mutation(graphene.ObjectType):
     # token = Token.Field()
 
     socialAuth = SocialAuth.Field()
+
+    authenticate = Authenticate.Field()
