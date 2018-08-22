@@ -17,12 +17,14 @@ def psa(f):
         try:
             backend = load_backend(strategy, provider, redirect_uri=None)
         except MissingBackend:
-            raise exceptions.GraphQLSocialAuthError(_('Provider not found'))
+            # raise exceptions.GraphQLSocialAuthError(_('Provider not found'))
+            pass
 
         user = backend.do_auth(access_token)
 
         if user is None:
-            raise exceptions.GraphQLSocialAuthError(_('Invalid token'))
+            # raise exceptions.GraphQLSocialAuthError(_('Invalid token'))
+            pass
 
         if not issubclass(cls, mixins.JSONWebTokenMixin):
             login(info.context, user)

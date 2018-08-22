@@ -20,6 +20,15 @@ from rest_framework_simplejwt.state import (
 from rest_framework_simplejwt.backends import (
     TokenBackend
 )
+# from rest_social_auth.views import (
+#     decorate_request,
+#     set_input_data,
+#     get_serializer_in,
+#     get_serializer_in_data
+# )
+from django.conf import settings
+from rest_social_auth.views import BaseSocialAuthView, decorate_request
+from social_django.utils import load_backend, load_strategy
 import graphene
 import graphql_jwt
 import graphql_social_auth
@@ -316,9 +325,50 @@ class Authenticate(graphene.Mutation):
     @classmethod
     def mutate(cls, context, info, **input):
         # TODO ADD LOGIC HERE
+        provider = input['input']['provider']
+        code = input['input']['code']
+
+        # strategy = load_strategy(info.context)
+        # backend = load_backend(strategy, provider, redirect_uri=None)
+        # user = backend.do_auth(code)
+
+        # BaseSocialAuthView
+        # input_data = self.get_serializer_in_data()
+        # set_input_data(request, input_data)
+        # decorate_request(info.context, provider)
+
+        input_data = input['input']
+        request = info.context
+
+        request.auth_data = input_data
+        decorate_request(request, provider)
+
+        # user = request.user or None
+        user = User()
+        manual_redirect_uri = request.auth_data.pop('redirect_uri', None)
+        # manual_redirect_uri = get_redirect_uri(manual_redirect_uri)
+
+        request.backend.redirect_uri = settings.REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI
+
+        request.backend.REDIRECT_STATE = False
+        request.backend.STATE_PARAMETER = False
+
+        # return {
+        #     'grant_type': 'authorization_code',
+        #     'code': self.data['code']
+        # }
+        user = request.backend.auth_complete()
+
+        # NOTE: user is saved at this point
+        # meh = {'_state': <django.db.models.base.ModelState object at 0x1055ba3c8>, 'id': 3, 'password': '!ZyNmL2RBp2hBcuKl5NMsUkBF9A5xDmyZoQZ7mT6p', 'last_login': None, 'is_superuser': False, 'first_name': 'Logan', 'last_name': '', 'is_staff': False, 'date_joined': datetime.datetime(2018, 8, 22, 2, 15, 15, 563286, tzinfo=<UTC>), 'username': 'lgants', 'email': 'lgants@gmail.com', 'role': 'user', 'is_active': False, 'created_at': datetime.datetime(2018, 8, 22, 2, 15, 15, 563845, tzinfo=<UTC>), 'updated_at': datetime.datetime(2018, 8, 22, 2, 15, 15, 573143, tzinfo=<UTC>), 'social_user': <UserSocialAuth: lgants>, 'is_new': False, 'backend': 'social_core.backends.github.GithubOAuth2'}
+
+
+
+
+
+
         # import pdb; pdb.set_trace()
         # {'input': {'provider': 'github', 'code': '123456'}}
-        user = User.objects.all()[0]
         return AuthPayload(user=user)
 
 
