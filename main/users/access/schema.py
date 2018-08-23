@@ -122,8 +122,9 @@ class RegisterUserInput(graphene.InputObjectType):
 
 
 class LoginUserInput(graphene.InputObjectType):
-    username = graphene.String(required=True)
-    # usernameOrEmail = graphene.String(required=True)
+    # username = graphene.String(required=True)
+    # NOTE: only username currently works
+    usernameOrEmail = graphene.String(required=True)
     password = graphene.String(required=True)
 
 
@@ -281,25 +282,25 @@ class Login(graphene.Mutation):
     def mutate(cls, context, info, **input):
         username_field = User.USERNAME_FIELD
 
-        ###### THIS WORKS ######
         # user = authenticate(**{
         #     username_field: input['input'][username_field],
         #     'password': input['input']['password'],
         # })
-        #
-        # if user is None or not user.is_active:
-        #     # raise serializers.ValidationError(
-        #     #     _('No active account found with given credentials'),
-        #     # )
-        #     pass
-        # else:
-        #     login(info.context, user)
-        #
-        # return AuthPayload(user=user)
-        ###### THIS WORKS ######
-        user = User.objects.all()[0]
+        user = authenticate(**{
+            username_field: input['input']['usernameOrEmail'],
+            'password': input['input']['password'],
+        })
+
+        if user is None or not user.is_active:
+            # raise serializers.ValidationError(
+            #     _('No active account found with given credentials'),
+            # )
+            pass
+        else:
+            login(info.context, user)
 
         return AuthPayload(user=user)
+
 
 
 

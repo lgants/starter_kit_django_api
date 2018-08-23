@@ -31,7 +31,7 @@ class Query(graphene.ObjectType):
         return Counter.objects.all()
 
 
-class AddCounter(graphene.Mutation):
+class AddServerCounter(graphene.Mutation):
     class Arguments:
         amount = graphene.Int()
 
@@ -45,11 +45,11 @@ class AddCounter(graphene.Mutation):
         counter = Counter.objects.first()
         counter.amount += amount
         counter.save()
-        return AddCounter(amount=counter.amount)
+        return AddServerCounter(amount=counter.amount)
 
 
 class Mutation(graphene.ObjectType):
-    addCounter = AddCounter.Field()
+    addServerCounter = AddServerCounter.Field()
 
 
 class CounterSubscription(Subscription):
