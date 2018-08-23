@@ -195,7 +195,16 @@ class Query(graphene.ObjectType):
         return User.objects.all()
 
     def resolve_current_user(self, info, **kwargs):
-        return info.context.user
+        # print(info.context.user)
+        # return info.context.user
+
+        return User.objects.all()[0]
+
+
+        # import pdb; pdb.set_trace()
+        # print(info.context.user)
+        # return info.context.user
+        # return User.objects.all()[0]
         # if info.context.user.is_anonymous:
         # # if not info.context.user.is_authenticated()
         #     # return User.objects.none()

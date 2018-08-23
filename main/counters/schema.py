@@ -9,10 +9,14 @@ class CounterType(DjangoObjectType):
         model = Counter
 
 class Query(graphene.ObjectType):
+    server_counter = graphene.Field(CounterType)
     counter = graphene.Field(CounterType,
                               id=graphene.Int(),
                               amount=graphene.Int())
     counters = graphene.List(CounterType)
+
+    def resolve_server_counter(self, info, **kwargs):
+        return Counter.objects.all()[0]
 
     def resolve_counter(self, info, **kwargs):
         id = kwargs.get('id')
@@ -20,7 +24,7 @@ class Query(graphene.ObjectType):
         # import pdb; pdb.set_trace()
 
         # return Counter.objects.get(pk=id)
-        return Counter.objects.all().first()
+        return Counter.objects.all()[0]
 
     def resolve_counters(self, info, **kwargs):
         # import pdb; pdb.set_trace()

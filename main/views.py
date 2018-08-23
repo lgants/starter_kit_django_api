@@ -72,6 +72,10 @@ class MyGraphQLView(ModifiedGraphQLView):
     def dispatch(self, request, *args, **kwargs):
         request_type = request.META.get("CONTENT_TYPE", '')
 
+        # import pdb; pdb.set_trace()
+        # if request.method == 'POST':
+        #     import pdb; pdb.set_trace()
+
         # NOTE: need to overwrite inherited dispatch func and handle explicitly if multipart since batch=True incorrectly treats multipart as a batch request
         if "multipart/form-data" in request_type:
             try:

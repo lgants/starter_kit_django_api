@@ -281,18 +281,23 @@ class Login(graphene.Mutation):
     def mutate(cls, context, info, **input):
         username_field = User.USERNAME_FIELD
 
-        user = authenticate(**{
-            username_field: input['input'][username_field],
-            'password': input['input']['password'],
-        })
-
-        if user is None or not user.is_active:
-            # raise serializers.ValidationError(
-            #     _('No active account found with given credentials'),
-            # )
-            pass
-        else:
-            login(info.context, user)
+        ###### THIS WORKS ######
+        # user = authenticate(**{
+        #     username_field: input['input'][username_field],
+        #     'password': input['input']['password'],
+        # })
+        #
+        # if user is None or not user.is_active:
+        #     # raise serializers.ValidationError(
+        #     #     _('No active account found with given credentials'),
+        #     # )
+        #     pass
+        # else:
+        #     login(info.context, user)
+        #
+        # return AuthPayload(user=user)
+        ###### THIS WORKS ######
+        user = User.objects.all()[0]
 
         return AuthPayload(user=user)
 
@@ -361,13 +366,14 @@ class Authenticate(graphene.Mutation):
 
         # NOTE: user is saved at this point
         # meh = {'_state': <django.db.models.base.ModelState object at 0x1055ba3c8>, 'id': 3, 'password': '!ZyNmL2RBp2hBcuKl5NMsUkBF9A5xDmyZoQZ7mT6p', 'last_login': None, 'is_superuser': False, 'first_name': 'Logan', 'last_name': '', 'is_staff': False, 'date_joined': datetime.datetime(2018, 8, 22, 2, 15, 15, 563286, tzinfo=<UTC>), 'username': 'lgants', 'email': 'lgants@gmail.com', 'role': 'user', 'is_active': False, 'created_at': datetime.datetime(2018, 8, 22, 2, 15, 15, 563845, tzinfo=<UTC>), 'updated_at': datetime.datetime(2018, 8, 22, 2, 15, 15, 573143, tzinfo=<UTC>), 'social_user': <UserSocialAuth: lgants>, 'is_new': False, 'backend': 'social_core.backends.github.GithubOAuth2'}
+        if user is None or not user.is_active:
+            # raise serializers.ValidationError(
+            #     _('No active account found with given credentials'),
+            # )
+            pass
+        else:
+            login(info.context, user)
 
-
-
-
-
-
-        # import pdb; pdb.set_trace()
         # {'input': {'provider': 'github', 'code': '123456'}}
         return AuthPayload(user=user)
 
