@@ -15,7 +15,6 @@ def get_object(model, id, otherwise=None):
         return otherwise
 
 def update_or_create(instance, input, exception=['id']):
-    # import pdb; pdb.set_trace()
     if instance:
         [setattr(instance, key, value) for key, value in input.items() if key not in exception]
 

@@ -17,24 +17,15 @@ from rest_framework_simplejwt.tokens import (
 from rest_framework_simplejwt.state import (
     token_backend
 )
-from rest_framework_simplejwt.backends import (
-    TokenBackend
-)
-# from rest_social_auth.views import (
-#     decorate_request,
-#     set_input_data,
-#     get_serializer_in,
-#     get_serializer_in_data
-# )
 from django.conf import settings
 from rest_social_auth.views import BaseSocialAuthView, decorate_request
 from social_django.utils import load_backend, load_strategy
-import graphene
-import graphql_jwt
-import graphql_social_auth
 from .decorators import social_auth
 from .mixins import SocialAuthMixin
 from .types import SocialType
+import graphene
+import graphql_jwt
+import graphql_social_auth
 
 User = get_user_model()
 
@@ -63,18 +54,16 @@ class AuthPayload(graphene.ObjectType):
         return self.user
 
     def resolve_tokens(self, info, **kwargs):
-        # import pdb; pdb.set_trace()
-        # graphql_jwt.utils.
-        # TODO: CREATE TOKENS HERE AND PASS AS ARG
-
-        # return [Tokens]
         refresh = RefreshToken.for_user(self.user)
         access = refresh.access_token
 
         access_token = token_backend.encode(access.payload)
         refresh_token = token_backend.encode(refresh.payload)
 
-        return Tokens(accessToken=access_token, refreshToken=refresh_token)
+        return Tokens(
+            accessToken=access_token,
+            refreshToken=refresh_token
+        )
 
     def resolve_errors(self, info, **kwargs):
         # check if user is valid else return errors
@@ -133,19 +122,6 @@ class AuthenticateInput(graphene.InputObjectType):
     code = graphene.String(required=True)
 
 
-# class Login(graphene.Mutation):
-#     class Arguments:
-#         #   login(input: LoginUserInput!): AuthPayload!
-#         input = graphene.Argument(LoginUserInput, required=True)
-#         # input = LoginUserInput(required=True)
-#
-#     Output = AuthPayload
-#
-#     @classmethod
-#     def mutate(cls, context, info, **input):
-#         return AuthPayload(user=User(**input['input']))
-
-
 class ForgotPassword(graphene.Mutation):
     class Arguments:
         #   forgotPassword(input: ForgotPasswordInput!): String
@@ -180,7 +156,6 @@ class Register(graphene.Mutation):
     @classmethod
     def mutate(cls, context, info, **input):
         return UserPayload(user=User(**input['input']))
-        # return UserPayload(user)
 
 
 class RefreshTokens(graphene.Mutation):
@@ -207,76 +182,6 @@ class Logout(graphene.Mutation):
         return cls(logout="ok")
 
 
-# class Token(SerializerMutation):
-#     class Meta:
-#         serializer_class = TokenObtainPairSerializer
-#
-#     Output = Tokens
-
-
-# class TokenMixin(object):
-#     @classmethod
-#     def get_token(cls, user):
-#         raise NotImplemented('Must implement `get_token` method for `TokenObtainSerializer` subclasses')
-#
-#     @classmethod
-#     def validate(cls, attrs):
-#         username_field = User.USERNAME_FIELD
-#
-#         print("attrs", attrs)
-#         # import pdb; pdb.set_trace()
-#
-#         # NOTE: MUST use get_user_model when creating users AND MUST set is_active on user to True
-#         user = authenticate(**{
-#             username_field: attrs[username_field],
-#             'password': attrs['password'],
-#         })
-#
-#         if user is None or not user.is_active:
-#             raise Exception('No active account found with the given credentials')
-#
-#         # return {}
-#         return user
-
-
-# class Token(TokenMixin, graphene.Mutation):
-#     class Arguments:
-#         input = graphene.Argument(LoginUserInput, required=True)
-#
-#     Output = Tokens
-#
-#     @classmethod
-#     def get_token(cls, user):
-#         return RefreshToken.for_user(user)
-#
-#     @classmethod
-#     def aggregate(cls, attrs):
-#         user = super(Token, cls).validate(attrs)
-#
-#         refresh = cls.get_token(user)
-#
-#         import pdb; pdb.set_trace()
-#
-#         data = {}
-#         data['refresh'] = text_type(refresh)
-#         data['access'] = text_type(refresh.access_token)
-#
-#         return data, user
-#
-#     @classmethod
-#     def mutate(cls, context, info, **input):
-#         attrs = input['input']
-#         data, user = cls.aggregate(attrs)
-#
-#         import pdb; pdb.set_trace()
-#
-#         # TODO: self is undefined
-#         token = cls.get_token(user)
-#
-#
-#         return Tokens
-
-
 class Login(graphene.Mutation):
     class Arguments:
         input = graphene.Argument(LoginUserInput, required=True)
@@ -287,10 +192,7 @@ class Login(graphene.Mutation):
     def mutate(cls, context, info, **input):
         username_field = User.USERNAME_FIELD
 
-        # user = authenticate(**{
-        #     username_field: input['input'][username_field],
-        #     'password': input['input']['password'],
-        # })
+        # NOTE: need to change; currently uses username and NOT email
         user = authenticate(**{
             username_field: input['input']['usernameOrEmail'],
             'password': input['input']['password'],
@@ -307,26 +209,6 @@ class Login(graphene.Mutation):
         return AuthPayload(user=user)
 
 
-
-
-class SocialAuth(SocialAuthMixin, graphene.Mutation):
-    # NOTE: WIP
-    # https://github.com/st4lk/django-rest-social-auth/blob/master/rest_social_auth/views.py
-    social = graphene.Field(SocialType)
-
-    # class Meta:
-    #     abstract = True
-
-    class Arguments:
-        provider = graphene.String(required=True)
-        access_token = graphene.String(required=True)
-
-    @classmethod
-    @social_auth
-    def mutate(cls, root, info, social, **kwargs):
-        return cls.resolve(root, info, social, **kwargs)
-
-
 class Authenticate(graphene.Mutation):
     class Arguments:
         input = graphene.Argument(AuthenticateInput)
@@ -335,45 +217,25 @@ class Authenticate(graphene.Mutation):
 
     @classmethod
     def mutate(cls, context, info, **input):
-        # TODO ADD LOGIC HERE
-        provider = input['input']['provider']
-        code = input['input']['code']
-
-        # strategy = load_strategy(info.context)
-        # backend = load_backend(strategy, provider, redirect_uri=None)
-        # user = backend.do_auth(code)
-
-        # BaseSocialAuthView
-        # input_data = self.get_serializer_in_data()
-        # set_input_data(request, input_data)
-        # decorate_request(info.context, provider)
-
-        input_data = input['input']
         request = info.context
+        input_data = input['input']
+
+        provider = input_data['provider']
+        code = input_data['code']
 
         request.auth_data = input_data
         decorate_request(request, provider)
 
-        # user = request.user or None
         user = User()
         manual_redirect_uri = request.auth_data.pop('redirect_uri', None)
-        # manual_redirect_uri = get_redirect_uri(manual_redirect_uri)
 
         request.backend.redirect_uri = settings.REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI
 
         request.backend.REDIRECT_STATE = False
         request.backend.STATE_PARAMETER = False
 
-        # return {
-        #     'grant_type': 'authorization_code',
-        #     'code': self.data['code']
-        # }
         user = request.backend.auth_complete()
 
-        # NOTE: user is saved at this point
-        # meh = {'_state': <django.db.models.base.ModelState object at 0x1055ba3c8>, 'id': 3, 'password': '!ZyNmL2RBp2hBcuKl5NMsUkBF9A5xDmyZoQZ7mT6p', 'last_login': None, 'is_superuser': False, 'first_name': 'Logan', 'last_name': '', 'is_staff': False, 'date_joined': datetime.datetime(2018, 8, 22, 2, 15, 15, 563286, tzinfo=<UTC>), 'username': 'lgants', 'email': 'lgants@gmail.com', 'role': 'user', 'is_active': False, 'created_at': datetime.datetime(2018, 8, 22, 2, 15, 15, 563845, tzinfo=<UTC>), 'updated_at': datetime.datetime(2018, 8, 22, 2, 15, 15, 573143, tzinfo=<UTC>), 'social_user': <UserSocialAuth: lgants>, 'is_new': False, 'backend': 'social_core.backends.github.GithubOAuth2'}
-
-        print('dis user', user)
         if user is None or not user.is_active:
             # raise serializers.ValidationError(
             #     _('No active account found with given credentials'),
@@ -403,8 +265,5 @@ class Mutation(graphene.ObjectType):
     # Logout user
     logout = Logout.Field()
 
-    # token = Token.Field()
-
-    socialAuth = SocialAuth.Field()
 
     authenticate = Authenticate.Field()
