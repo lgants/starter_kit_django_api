@@ -8,15 +8,8 @@ from django.contrib.auth import get_user_model, login, logout
 from main.users.schema import UserType, UserPayload
 from main.common import FieldError
 from main.helpers import get_object, update_or_create, get_errors
-from rest_framework_simplejwt.serializers import (
-    TokenObtainPairSerializer
-)
-from rest_framework_simplejwt.tokens import (
-    RefreshToken
-)
-from rest_framework_simplejwt.state import (
-    token_backend
-)
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.state import token_backend
 from django.conf import settings
 from rest_social_auth.views import BaseSocialAuthView, decorate_request
 from social_django.utils import load_backend, load_strategy
@@ -161,13 +154,33 @@ class Register(graphene.Mutation):
 class RefreshTokens(graphene.Mutation):
     class Arguments:
         # refreshTokens(refreshToken: String!): Tokens!
-        refresh_token = graphene.String(required=True)
+        refreshToken = graphene.String(required=True)
 
     Output = Tokens
 
     @classmethod
     def mutate(cls, context, info, **input):
-        return Tokens
+        refresh = RefreshToken(input['refreshToken'])
+
+        if settings.SIMPLE_JWT.get('ROTATE_REFRESH_TOKENS'):
+            if settings.SIMPLE_JWT.get('BLACKLIST_AFTER_ROTATION'):
+                try:
+                    # Attempt to blacklist the given refresh token
+                    refresh.blacklist()
+                except AttributeError:
+                    # If blacklist app not installed, `blacklist` method will not be present
+                    pass
+
+            refresh.set_jti()
+            refresh.set_exp()
+
+        access_token = token_backend.encode(refresh.access_token.payload)
+        refresh_token = token_backend.encode(refresh.payload)
+
+        return Tokens(
+            accessToken=access_token,
+            refreshToken=refresh_token
+        )
 
 
 class Logout(graphene.Mutation):
@@ -244,14 +257,10 @@ class Authenticate(graphene.Mutation):
         else:
             login(info.context, user)
 
-        # {'input': {'provider': 'github', 'code': '123456'}}
         return AuthPayload(user=user)
 
 
 class Mutation(graphene.ObjectType):
-    # token_auth = graphql_jwt.ObtainJSONWebToken.Field()
-    # verify_token = graphql_jwt.Verify.Field()
-    # refresh_token = graphql_jwt.Refresh.Field()
     # Login user
     login = Login.Field()
     # Forgot password
@@ -264,6 +273,5 @@ class Mutation(graphene.ObjectType):
     refreshTokens = RefreshTokens.Field()
     # Logout user
     logout = Logout.Field()
-
-
+    # Authenticate user
     authenticate = Authenticate.Field()

@@ -67,18 +67,6 @@ class UserType(DjangoObjectType):
         model = User
 
 
-    # def resolve_profile(self, info, **kwargs):
-    #     pass
-    #
-    # def resolve_auth(self, info, **kwargs):
-    #     # self is user
-    #     # TODO: generate the auth tokens here  ???
-    #     # import pdb; pdb.set_trace()
-    #     pass
-
-
-
-
 class UserPayload(graphene.ObjectType):
     user = graphene.Field(UserType)
     errors = graphene.List(FieldError) # [FieldError!] ???
@@ -199,17 +187,6 @@ class Query(graphene.ObjectType):
             return None
         else:
             return info.context.user
-
-        # import pdb; pdb.set_trace()
-        # print(info.context.user)
-        # return info.context.user
-        # return User.objects.all()[0]
-        # if info.context.user.is_anonymous:
-        # # if not info.context.user.is_authenticated()
-        #     # return User.objects.none()
-        #     return None
-        # else:
-        #     return info.context.user
 
 
 class AddUser(graphene.Mutation):
