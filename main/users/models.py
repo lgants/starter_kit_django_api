@@ -12,9 +12,11 @@ class User(AbstractUser):
 
 
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=128)
-    last_name = models.CharField(max_length=128)
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE, related_name='profile')
+    avatar_url = models.CharField(blank=True, null=True, max_length=256)
+    bio = models.TextField(blank=True, null=True, max_length=512) # TODO: determine if partner sites possess similiar limit; would fail otherwise
+    first_name = models.CharField(blank=True, null=True, max_length=128)
+    last_name = models.CharField(blank=True, null=True, max_length=128)
 
     @property
     def full_name(self):
@@ -22,29 +24,33 @@ class UserProfile(models.Model):
 
 
 class AuthCertificate(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE)
     serial = models.CharField(max_length=128, unique=True)
 
 
 class AuthFacebook(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE, related_name='auth_facebook')
     fb_id = models.CharField(max_length=256, unique=True)
     display_name = models.CharField(max_length=256)
+    response = models.TextField()
 
 
 class AuthGithub(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE, related_name='auth_github')
     gh_id = models.CharField(max_length=256, unique=True)
     display_name = models.CharField(max_length=256)
+    response = models.TextField()
 
 
 class AuthGoogle(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE, related_name='auth_google')
     google_id = models.CharField(max_length=256, unique=True)
     display_name = models.CharField(max_length=256)
+    response = models.TextField()
 
 
 class AuthLinkedin(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE, related_name='auth_linkedin')
     ln_id = models.CharField(max_length=256, unique=True)
     display_name = models.CharField(max_length=256)
+    response = models.TextField()
