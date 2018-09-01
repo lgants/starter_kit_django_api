@@ -11,7 +11,7 @@ from main.helpers import get_object, update_or_create, get_errors
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.state import token_backend
 from django.conf import settings
-from rest_social_auth.views import BaseSocialAuthView, decorate_request
+from rest_social_auth.views import decorate_request
 from social_django.utils import load_backend, load_strategy
 from .decorators import social_auth
 from .mixins import SocialAuthMixin
