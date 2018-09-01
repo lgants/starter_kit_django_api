@@ -27,6 +27,7 @@ graphene-django==2.1.0
 graphene-django-extras==0.3.7
 graphene-django-subscriptions==0.0.4
 graphene-file-upload==0.1.2
+graphene-permissions==1.1.1
 graphql-core==2.1
 graphql-relay==0.4.5
 hyperlink==18.0.0

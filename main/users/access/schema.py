@@ -40,17 +40,13 @@ class AuthPayload(graphene.ObjectType):
     errors = graphene.List(FieldError) # errors: [FieldError!]
 
     def resolve_user(self, info, **kwargs):
-
-        # get_object(User, kwargs['id'])
-        # self.user contains the user info; not kwargs
         # TODO: add hook on User model to send email on User creation
         return self.user
 
     def resolve_tokens(self, info, **kwargs):
         refresh = RefreshToken.for_user(self.user)
-        access = refresh.access_token
 
-        access_token = token_backend.encode(access.payload)
+        access_token = token_backend.encode(refresh.access.payload)
         refresh_token = token_backend.encode(refresh.payload)
 
         return Tokens(
@@ -62,25 +58,6 @@ class AuthPayload(graphene.ObjectType):
         # check if user is valid else return errors
         # return [FieldError]
         return None
-
-
-# class AuthPayload(graphql_jwt.JSONWebTokenMutation):
-#     user = graphene.Field(UserType)
-#     # tokens = graphene.List(Tokens) # might be a list
-#     # errors = graphene.List(FieldError) # errors: [FieldError!]
-#
-#     @classmethod
-#     def resolve(cls, root, info):
-#         return cls(user=info.context.user)
-#
-#     # def resolve_user(self, info, **kwargs):
-#     #     get_object(User, kwargs['id'])
-#
-#     # def resolve_tokens(self, info, **kwargs):
-#     #     return [Tokens]
-#     #
-#     # def resolve_errors(self, info, **kwargs):
-#     #     return [FieldError]
 
 
 class ResetPayload(graphene.ObjectType):
