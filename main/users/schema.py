@@ -5,44 +5,50 @@ from main.helpers import get_object
 from main.common import FieldError
 from django.contrib.auth import get_user_model
 import graphene
+from main.mixins import AuthType
+from main.permissions import AllowStaff
 
 
 User = get_user_model()
 
 
-class UserProfileType(DjangoObjectType):
+class UserProfileType(AuthType, DjangoObjectType):
+    # permission_classes = (AllowStaff,) # NOTE: works but implement permissions later
+
     firstName = graphene.String()
     lastName = graphene.String()
     fullName = graphene.String()
 
     class Meta:
-        name = "UserProfile"
+        name = 'UserProfile'
         model = UserProfile
+        # only_fields=('id', 'username')
+        # exclude_fields = ('email', 'is_active', 'is_staff', 'is_superuser', 'roloe', 'date_joined', 'created_at', 'updated_at')
 
 
 class AuthCertificateType(DjangoObjectType):
     class Meta:
-        name = "CertificateAuth"
+        name = 'CertificateAuth'
         model = AuthCertificate
 
 class AuthFacebookType(DjangoObjectType):
     class Meta:
-        name = "FacebookAuth"
+        name = 'FacebookAuth'
         model = AuthFacebook
 
 class AuthGithubType(DjangoObjectType):
     class Meta:
-        name = "GithubAuth"
+        name = 'GithubAuth'
         model = AuthGithub
 
 class AuthGoogleType(DjangoObjectType):
     class Meta:
-        name = "GoogleAuth"
+        name = 'GoogleAuth'
         model = AuthGoogle
 
 class AuthLinkedinType(DjangoObjectType):
     class Meta:
-        name = "LinkedInAuth"
+        name = 'LinkedInAuth'
         model = AuthLinkedin
 
 
@@ -54,7 +60,7 @@ class UserAuthType(graphene.ObjectType):
     linkedin = graphene.Field(AuthLinkedinType)
 
     class Meta:
-        name = "UserAuth"
+        name = 'UserAuth'
 
 
 class UserType(DjangoObjectType):
@@ -63,7 +69,7 @@ class UserType(DjangoObjectType):
     auth = graphene.Field(UserAuthType)
 
     class Meta:
-        name = "User"
+        name = 'User'
         model = User
 
 
