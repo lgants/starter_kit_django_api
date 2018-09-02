@@ -74,3 +74,22 @@ class AllowSuperuser:
     @staticmethod
     def has_filter_permission(info: ResolveInfo) -> bool:
         return info.context.user.is_superuser
+
+
+class AllowCreator: # AllowOwner???
+    """
+    Allow performing action only for creators.
+    """
+
+    @staticmethod
+    def has_type_permission(info: ResolveInfo, id: str) -> bool:
+        return info.context.user.is_superuser
+
+    @staticmethod
+    def has_mutation_permission(root: Any, info: ResolveInfo, input: dict) -> bool:
+        import pdb; pdb.set_trace()
+        return info.context.user.is_superuser
+
+    @staticmethod
+    def has_filter_permission(info: ResolveInfo) -> bool:
+        return info.context.user.is_superuser

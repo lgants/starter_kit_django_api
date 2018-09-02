@@ -230,6 +230,8 @@ class EditUser(AuthMutation, graphene.Mutation):
                 return UserPayload(errors=get_field_errors(e))
 
 
+
+
 class DeleteUser(AuthMutation, graphene.Mutation):
     permission_classes = (AllowAuthenticated,)
 
@@ -249,6 +251,8 @@ class DeleteUser(AuthMutation, graphene.Mutation):
                 if instance:
                     user = instance.delete()
                     return UserPayload(user=user)
+            except Exception as e:
+                return None
 
 
 class Mutation(graphene.ObjectType):
