@@ -4,8 +4,9 @@ class FieldError(graphene.ObjectType):
     field = graphene.String()
     message = graphene.String()
 
-    def resole_field(self, info, **kwargs):
-        return "error"
+    def resolve_field(self, info, **kwargs):
+        # import pdb; pdb.set_trace()
+        return self.field
 
-    def resole_message(self, info, **kwargs):
-        return "message"
+    def resolve_message(self, info, **kwargs):
+        return self.message

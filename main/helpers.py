@@ -18,6 +18,7 @@ def update_or_create(instance, input, exception=['id']):
     if instance:
         [setattr(instance, key, value) for key, value in input.items() if key not in exception]
 
+    instance.full_clean() #NOTE: must call full_clean to raise ValidationError
     # NOTE: elasticsearch must be running as every saved instance must go through elasticsearch
     instance.save()
 
@@ -27,7 +28,17 @@ def get_errors(e):
     # transform django errors to redux errors
     # django: {"key1": [value1], {"key2": [value2]}}
     # redux: ["key1", "value1", "key2", "value2"]
-    fields = e.message_dict.keys()
-    messages = ['; '.join(m) for m in e.message_dict.values()]
-    errors = [i for pair in zip(fields, messages) for i in pair]
+    # fields = e.message_dict.keys()
+    # messages = ['; '.join(m) for m in e.message_dict.values()]
+    # errors = [i for pair in zip(fields, messages) for i in pair]
+    # return errors
+    return e.message_dict
+
+def get_field_errors(e):
+    errors = []
+
+    for field, messages in e.message_dict.items():
+        error = {'field': field, 'message': '; '.join(messages)}
+        errors.append(error)
+
     return errors

@@ -1,12 +1,14 @@
 from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
 from .models import (UserProfile, AuthCertificate, AuthFacebook, AuthGithub, AuthGoogle, AuthLinkedin)
-from main.helpers import get_object
+from main.helpers import get_object, update_or_create, get_field_errors, get_errors
 from main.common import FieldError
 from django.contrib.auth import get_user_model
 import graphene
-from main.mixins import AuthType
-from main.permissions import AllowStaff
+from main.mixins import AuthType, AuthMutation
+from main.permissions import AllowStaff, AllowAuthenticated
+from django.core.exceptions import ValidationError
+
 
 
 User = get_user_model()
@@ -22,8 +24,6 @@ class UserProfileType(AuthType, DjangoObjectType):
     class Meta:
         name = 'UserProfile'
         model = UserProfile
-        # only_fields=('id', 'username')
-        # exclude_fields = ('email', 'is_active', 'is_staff', 'is_superuser', 'roloe', 'date_joined', 'created_at', 'updated_at')
 
 
 class AuthCertificateType(DjangoObjectType):
@@ -71,6 +71,8 @@ class UserType(DjangoObjectType):
     class Meta:
         name = 'User'
         model = User
+        # only_fields=('id', 'username')
+        exclude_fields = ('email', 'password', 'is_active', 'is_staff', 'is_superuser', 'role', 'date_joined', 'created_at', 'updated_at')
 
 
 class UserPayload(graphene.ObjectType):
@@ -78,17 +80,10 @@ class UserPayload(graphene.ObjectType):
     errors = graphene.List(FieldError) # [FieldError!] ???
 
     def resolve_user(self, info, **kwargs):
-        # import pdb; pdb.set_trace()
-        # fields = [f.name for f in User._meta.get_fields()]
-        # obj = self.user.__dict__
-        # _user = {k: obj[k] for k in set(fields) & set(obj.keys())}
-        #
-        # return User(**_user)
-        return self
+        return self.user
 
     def resolve_errors(self, info, **kwargs):
-        # check if user is valid with self.user
-        return []
+        return FieldError(self.errors)
 
 
 
@@ -156,12 +151,12 @@ class AddUserInput(graphene.InputObjectType):
     auth = AuthInput # auth: AuthInput
 
 class EditUserInput(graphene.InputObjectType):
-    id = graphene.Int() #id: Int!
+    id = graphene.Int(required=True) #id: Int!
     username = graphene.String() #username: String!
     role = graphene.String() #role: String!
     isActive = graphene.Boolean() #isActive: Boolean
     email = graphene.String()  #email: String!
-    password = graphene.String()
+    password = graphene.String() #NOTE: verify this works
     profile = ProfileInput
     auth = AuthInput
 
@@ -178,15 +173,10 @@ class Query(graphene.ObjectType):
     current_user = graphene.Field(UserType)
 
     def resolve_user(self, info, **kwargs):
-        # import pdb; pdb.set_trace()
-        # import pdb; pdb.set_trace()
-        # return UserPayload
-        # return User.objects.first()
         return get_object(User, kwargs['id'])
 
     def resolve_users(self, info, **kwargs):
-        # import pdb; pdb.set_trace()
-        return User.objects.all()
+        return User.objects.all() # TODO: modify to use pagination
 
     def resolve_current_user(self, info, **kwargs):
         if info.context.user.is_anonymous:
@@ -207,7 +197,9 @@ class AddUser(graphene.Mutation):
         return None
 
 
-class EditUser(graphene.Mutation):
+class EditUser(AuthMutation, graphene.Mutation):
+    permission_classes = (AllowAuthenticated,)
+
     class Arguments:
         # editUser(input: EditUserInput!): UserPayload!
         input = graphene.Argument(EditUserInput, required=True)
@@ -216,7 +208,30 @@ class EditUser(graphene.Mutation):
 
     @classmethod
     def mutate(cls, context, info, **input):
-        return None
+        try:
+            user_input = input.get('input', {})
+            instance = get_object(User, user_input.get('id'))
+
+            if instance:
+                user = update_or_create(instance, user_input)
+                # return cls(updated_book=updated_book)
+                return UserPayload(user=user)
+        except ValidationError as e:
+            # return cls(updated_book=None, errors=get_errors(e))
+            return UserPayload(errors=get_field_errors(e))
+        # except Exception as e:
+        #     pass
+
+
+        #
+        # if cls.has_permission(context, info, input):
+        #     instance = User()
+        #     user = update_or_create(instance, input.get('input'))
+        #
+        #     return cls(**user)
+
+
+
 
 
 class DeleteUser(graphene.Mutation):

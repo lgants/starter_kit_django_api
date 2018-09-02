@@ -60,8 +60,7 @@ class RemoveFile(graphene.Mutation):
 
 class UploadFiles(graphene.Mutation):
     class Arguments:
-        # files = graphene.List(Upload)
-        files = graphene.Argument(graphene.List(Upload))
+        files = graphene.Argument(graphene.List(Upload)) # graphene.List(Upload)
 
     ok = graphene.Boolean()
 
