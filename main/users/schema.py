@@ -6,7 +6,7 @@ from main.common import FieldError
 from django.contrib.auth import get_user_model
 import graphene
 from main.mixins import AuthType, AuthMutation
-from main.permissions import AllowStaff, AllowAuthenticated
+from main.permissions import AllowAny, AllowStaff, AllowAuthenticated
 from django.core.exceptions import ValidationError, PermissionDenied
 
 
@@ -64,7 +64,6 @@ class UserAuthType(graphene.ObjectType):
 
 
 class UserType(DjangoObjectType):
-    # DjangoObjectType automatically includes fields on the model
     profile = graphene.Field(UserProfileType)
     auth = graphene.Field(UserAuthType)
 
@@ -76,8 +75,8 @@ class UserType(DjangoObjectType):
 
 
 class UserPayload(graphene.ObjectType):
-    user = graphene.Field(UserType)
-    errors = graphene.List(FieldError) # [FieldError!] ???
+    user = graphene.Field(UserType) # User
+    errors = graphene.List(FieldError) # [FieldError!]
 
     def resolve_user(self, info, **kwargs):
         return self.user
@@ -88,18 +87,18 @@ class UserPayload(graphene.ObjectType):
 
 
 class OrderByUserInput(graphene.InputObjectType):
-  # # id | username | role | isActive | email
+  # id | username | role | isActive | email
   column = graphene.String() # column: String
-  # # asc | desc
+  # asc | desc
   order = graphene.String() # order: String
 
 
 class FilterUserInput(graphene.InputObjectType):
-    # # search by username or email
+    # search by username or email
     searchText = graphene.String() # searchText: String
-    # # filter by role
+    # filter by role
     role = graphene.String() # role: String
-    # # filter by isActive
+    # filter by isActive
     isActive = graphene.Boolean() # isActive: Boolean
 
 
@@ -185,7 +184,9 @@ class Query(graphene.ObjectType):
             return info.context.user
 
 
-class AddUser(graphene.Mutation):
+class AddUser(AuthMutation, graphene.Mutation):
+    permission_classes = (AllowAny,)
+
     class Arguments:
         # addUser(input: AddUserInput!): UserPayload!
         input = graphene.Argument(AddUserInput, required=True)
@@ -194,7 +195,16 @@ class AddUser(graphene.Mutation):
 
     @classmethod
     def mutate(cls, context, info, **input):
-        return None
+        if cls.has_permission(context, info, input):
+            try:
+                add_user_input = input.get('input', {})
+                instance = get_object(User, add_user_input.get('id'))
+
+                if instance:
+                    user = update_or_create(instance, add_user_input)
+                    return UserPayload(user=user)
+            except ValidationError as e:
+                return UserPayload(errors=get_field_errors(e))
 
 
 class EditUser(AuthMutation, graphene.Mutation):

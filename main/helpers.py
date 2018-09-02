@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 # from graphql_relay.node.node import from_global_id
 #
 # def get_object(object_name, relayId, otherwise=None):
@@ -38,7 +40,8 @@ def get_field_errors(e):
     errors = []
 
     for field, messages in e.message_dict.items():
-        error = {'field': field, 'message': '; '.join(messages)}
+        dict = {'field': field, 'message': '; '.join(messages)}
+        error = SimpleNamespace(**dict)
         errors.append(error)
 
     return errors
