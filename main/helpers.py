@@ -18,7 +18,7 @@ def update_or_create(instance, input, exception=['id']):
     if instance:
         [setattr(instance, key, value) for key, value in input.items() if key not in exception]
 
-    instance.full_clean() #NOTE: must call full_clean to raise ValidationError
+    instance.full_clean() #NOTE: necessary to raise ValidationError
     # NOTE: elasticsearch must be running as every saved instance must go through elasticsearch
     instance.save()
 

@@ -83,7 +83,7 @@ class UserPayload(graphene.ObjectType):
         return self.user
 
     def resolve_errors(self, info, **kwargs):
-        return FieldError(self.errors)
+        return self.errors
 
 
 
@@ -209,18 +209,15 @@ class EditUser(AuthMutation, graphene.Mutation):
     @classmethod
     def mutate(cls, context, info, **input):
         try:
-            user_input = input.get('input', {})
-            instance = get_object(User, user_input.get('id'))
+            edit_user_input = input.get('input', {})
+            instance = get_object(User, edit_user_input.get('id'))
 
             if instance:
-                user = update_or_create(instance, user_input)
-                # return cls(updated_book=updated_book)
+                user = update_or_create(instance, edit_user_input)
                 return UserPayload(user=user)
         except ValidationError as e:
-            # return cls(updated_book=None, errors=get_errors(e))
             return UserPayload(errors=get_field_errors(e))
-        # except Exception as e:
-        #     pass
+
 
 
         #

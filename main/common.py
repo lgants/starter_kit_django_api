@@ -5,8 +5,7 @@ class FieldError(graphene.ObjectType):
     message = graphene.String()
 
     def resolve_field(self, info, **kwargs):
-        # import pdb; pdb.set_trace()
-        return self.field
+        return self['field'] # NOTE: cannot use dot notation
 
     def resolve_message(self, info, **kwargs):
-        return self.message
+        return self['message'] # NOTE: cannot use dot notation
