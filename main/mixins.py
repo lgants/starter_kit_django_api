@@ -1,10 +1,9 @@
-from typing import Any, Optional
-
 from django.db.models import Model
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import ResolveInfo
-
+from typing import Any, Optional
 from .permissions import AllowAny
+from django.core.exceptions import ValidationError, PermissionDenied
 
 
 class AuthType:
@@ -23,7 +22,7 @@ class AuthType:
                 object_instance = None
             return object_instance
         else:
-            return None
+            raise PermissionDenied('Permission Denied.')
 
 
 class AuthMutation:
@@ -34,9 +33,14 @@ class AuthMutation:
 
     @classmethod
     def has_permission(cls, root: Any, info: ResolveInfo, input: dict) -> bool:
-        return all(
+        permitted = all(
             (perm().has_mutation_permission(root, info, input) for perm in cls.permission_classes)
         )
+
+        if permitted:
+            return True
+        else:
+            raise PermissionDenied('Permission Denied.')
 
 
 class AuthFilter(DjangoFilterConnectionField):
@@ -47,9 +51,14 @@ class AuthFilter(DjangoFilterConnectionField):
 
     @classmethod
     def has_permission(cls, info: ResolveInfo) -> bool:
-        return all(
+        permitted = all(
             (perm().has_filter_permission(info) for perm in cls.permission_classes)
         )
+
+        if permitted:
+            return True
+        else:
+            raise PermissionDenied('Permission Denied.')
 
     @classmethod
     def connection_resolver(

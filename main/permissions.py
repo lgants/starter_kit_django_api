@@ -1,6 +1,5 @@
-from typing import Any
-
 from graphql import ResolveInfo
+from typing import Any
 # https://github.com/redzej/graphene-permissions
 
 class AllowAny:

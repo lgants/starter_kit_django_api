@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 import graphene
 from main.mixins import AuthType, AuthMutation
 from main.permissions import AllowStaff, AllowAuthenticated
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 
 
 
@@ -208,27 +208,16 @@ class EditUser(AuthMutation, graphene.Mutation):
 
     @classmethod
     def mutate(cls, context, info, **input):
-        try:
-            edit_user_input = input.get('input', {})
-            instance = get_object(User, edit_user_input.get('id'))
+        if cls.has_permission(context, info, input):
+            try:
+                edit_user_input = input.get('input', {})
+                instance = get_object(User, edit_user_input.get('id'))
 
-            if instance:
-                user = update_or_create(instance, edit_user_input)
-                return UserPayload(user=user)
-        except ValidationError as e:
-            return UserPayload(errors=get_field_errors(e))
-
-
-
-        #
-        # if cls.has_permission(context, info, input):
-        #     instance = User()
-        #     user = update_or_create(instance, input.get('input'))
-        #
-        #     return cls(**user)
-
-
-
+                if instance:
+                    user = update_or_create(instance, edit_user_input)
+                    return UserPayload(user=user)
+            except ValidationError as e:
+                return UserPayload(errors=get_field_errors(e))
 
 
 class DeleteUser(graphene.Mutation):
