@@ -1,14 +1,13 @@
+from django.core.exceptions import ValidationError, PermissionDenied
+from django.contrib.auth import get_user_model
 from graphene_django import DjangoObjectType
 from graphene_django_subscriptions.subscription import Subscription
-from .models import (UserProfile, AuthCertificate, AuthFacebook, AuthGithub, AuthGoogle, AuthLinkedin)
-from main.helpers import get_object, update_or_create, get_field_errors, get_errors
-from main.common import FieldError
-from django.contrib.auth import get_user_model
-import graphene
-from main.mixins import AuthType, AuthMutation
+from main.helpers import get_object, update_or_create, get_field_errors
 from main.permissions import AllowAny, AllowStaff, AllowAuthenticated
-from django.core.exceptions import ValidationError, PermissionDenied
-
+from main.mixins import AuthType, AuthMutation
+from main.common import FieldError
+from .models import (UserProfile, AuthCertificate, AuthFacebook, AuthGithub, AuthGoogle, AuthLinkedin)
+import graphene
 
 
 User = get_user_model()
@@ -31,10 +30,12 @@ class AuthCertificateType(DjangoObjectType):
         name = 'CertificateAuth'
         model = AuthCertificate
 
+
 class AuthFacebookType(DjangoObjectType):
     class Meta:
         name = 'FacebookAuth'
         model = AuthFacebook
+
 
 class AuthGithubType(DjangoObjectType):
     class Meta:
@@ -45,6 +46,7 @@ class AuthGoogleType(DjangoObjectType):
     class Meta:
         name = 'GoogleAuth'
         model = AuthGoogle
+
 
 class AuthLinkedinType(DjangoObjectType):
     class Meta:
@@ -70,7 +72,6 @@ class UserType(DjangoObjectType):
     class Meta:
         name = 'User'
         model = User
-        # only_fields=('id', 'username')
         exclude_fields = ('email', 'password', 'is_active', 'is_staff', 'is_superuser', 'role', 'date_joined', 'created_at', 'updated_at')
 
 
@@ -83,7 +84,6 @@ class UserPayload(graphene.ObjectType):
 
     def resolve_errors(self, info, **kwargs):
         return self.errors
-
 
 
 class OrderByUserInput(graphene.InputObjectType):
