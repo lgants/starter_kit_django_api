@@ -14,7 +14,7 @@ class AllowAny:
         return True
 
     @staticmethod
-    def has_mutation_permission(root: Any, info: ResolveInfo, input: dict) -> bool:
+    def has_mutation_permission(cls: Any, info: ResolveInfo, input: dict) -> bool:
         return True
 
     @staticmethod
@@ -32,7 +32,7 @@ class AllowAuthenticated:
         return info.context.user.is_authenticated
 
     @staticmethod
-    def has_mutation_permission(root: Any, info: ResolveInfo, input: dict) -> bool:
+    def has_mutation_permission(cls: Any, info: ResolveInfo, input: dict) -> bool:
         return info.context.user.is_authenticated
 
     @staticmethod
@@ -50,7 +50,7 @@ class AllowStaff:
         return info.context.user.is_staff
 
     @staticmethod
-    def has_mutation_permission(root: Any, info: ResolveInfo, input: dict) -> bool:
+    def has_mutation_permission(cls: Any, info: ResolveInfo, input: dict) -> bool:
         return info.context.user.is_staff
 
     @staticmethod
@@ -68,26 +68,7 @@ class AllowSuperuser:
         return info.context.user.is_superuser
 
     @staticmethod
-    def has_mutation_permission(root: Any, info: ResolveInfo, input: dict) -> bool:
-        return info.context.user.is_superuser
-
-    @staticmethod
-    def has_filter_permission(info: ResolveInfo) -> bool:
-        return info.context.user.is_superuser
-
-
-class AllowCreator: # AllowOwner???
-    """
-    Allow performing action only for creators.
-    """
-
-    @staticmethod
-    def has_type_permission(info: ResolveInfo, id: str) -> bool:
-        return info.context.user.is_superuser
-
-    @staticmethod
-    def has_mutation_permission(root: Any, info: ResolveInfo, input: dict) -> bool:
-        import pdb; pdb.set_trace()
+    def has_mutation_permission(cls: Any, info: ResolveInfo, input: dict) -> bool:
         return info.context.user.is_superuser
 
     @staticmethod

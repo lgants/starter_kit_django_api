@@ -35,23 +35,28 @@ class AuthFacebookType(DjangoObjectType):
     class Meta:
         name = 'FacebookAuth'
         model = AuthFacebook
+        exclude_fields = ('fb_id', 'display_name')
 
 
 class AuthGithubType(DjangoObjectType):
     class Meta:
         name = 'GithubAuth'
         model = AuthGithub
+        exclude_fields = ('gh_id', 'display_name')
+
 
 class AuthGoogleType(DjangoObjectType):
     class Meta:
         name = 'GoogleAuth'
         model = AuthGoogle
+        exclude_fields = ('google_id', 'display_name')
 
 
 class AuthLinkedinType(DjangoObjectType):
     class Meta:
         name = 'LinkedInAuth'
         model = AuthLinkedin
+        exclude_fields = ('ln_id', 'display_name')
 
 
 class UserAuthType(graphene.ObjectType):
@@ -139,7 +144,6 @@ class ProfileInput(graphene.InputObjectType):
     lastName = graphene.String()
 
 
-# NOTE: this is used when signing up without external service
 class AddUserInput(graphene.InputObjectType):
     username = graphene.String(required=True) # username: String!
     email = graphene.String(required=True) # email: String!
@@ -148,6 +152,7 @@ class AddUserInput(graphene.InputObjectType):
     isActive = graphene.Boolean() # isActive: Boolean
     profile = ProfileInput # profile: ProfileInput
     auth = AuthInput # auth: AuthInput
+
 
 class EditUserInput(graphene.InputObjectType):
     id = graphene.Int(required=True) #id: Int!
@@ -168,7 +173,6 @@ class UpdateUserPayload(graphene.ObjectType):
 class Query(graphene.ObjectType):
     user = graphene.Field(UserPayload, id=graphene.Int())
     users = graphene.List(UserType)
-
     current_user = graphene.Field(UserType)
 
     def resolve_user(self, info, **kwargs):
@@ -228,8 +232,6 @@ class EditUser(AuthMutation, graphene.Mutation):
                     return UserPayload(user=user)
             except ValidationError as e:
                 return UserPayload(errors=get_field_errors(e))
-
-
 
 
 class DeleteUser(AuthMutation, graphene.Mutation):
