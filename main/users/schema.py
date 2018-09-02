@@ -230,7 +230,9 @@ class EditUser(AuthMutation, graphene.Mutation):
                 return UserPayload(errors=get_field_errors(e))
 
 
-class DeleteUser(graphene.Mutation):
+class DeleteUser(AuthMutation, graphene.Mutation):
+    permission_classes = (AllowAuthenticated,)
+
     class Arguments:
         # deleteUser(id: Int!): UserPayload!
         id = graphene.Int(required=True)
@@ -239,7 +241,14 @@ class DeleteUser(graphene.Mutation):
 
     @classmethod
     def mutate(cls, context, info, **input):
-        return None
+        if cls.has_permission(context, info, input):
+            try:
+                delete_user_input = input.get('input', {})
+                instance = get_object(User, delete_user_input.get('id'))
+
+                if instance:
+                    user = instance.delete()
+                    return UserPayload(user=user)
 
 
 class Mutation(graphene.ObjectType):
