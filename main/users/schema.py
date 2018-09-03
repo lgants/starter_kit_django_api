@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from graphene_django import DjangoObjectType
 # from graphene_django_subscriptions.subscription import Subscription
 from main.helpers import get_object, update_or_create, get_field_errors
-from main.permissions import AllowAny, AllowAuthenticated
+from main.permissions import AllowAny, AllowAuthenticated, AllowOwnerOrSuperuser
 from main.mixins import AuthType, AuthMutation
 from main.common import FieldError
 from .models import (
@@ -219,7 +219,7 @@ class AddUser(AuthMutation, graphene.Mutation):
 
 
 class EditUser(AuthMutation, graphene.Mutation):
-    permission_classes = (AllowAuthenticated,)
+    permission_classes = (AllowAuthenticated, AllowOwnerOrSuperuser)
 
     class Arguments:
         # editUser(input: EditUserInput!): UserPayload!
@@ -229,7 +229,7 @@ class EditUser(AuthMutation, graphene.Mutation):
 
     @classmethod
     def mutate(cls, context, info, **input):
-        if cls.has_permission(context, info, input):
+        if cls.has_permission(User, info, input):
             try:
                 edit_user_input = input.get('input', {})
                 instance = get_object(User, edit_user_input.get('id'))

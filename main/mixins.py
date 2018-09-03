@@ -62,9 +62,9 @@ class AuthFilter(DjangoFilterConnectionField):
 
     @classmethod
     def connection_resolver(
-            cls, resolver, connection, default_manager,
-            max_limit, enforce_first_or_last, filterset_class,
-            filtering_args, root, info, **args
+        cls, resolver, connection, default_manager,
+        max_limit, enforce_first_or_last, filterset_class,
+        filtering_args, root, info, **args
     ):
 
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
