@@ -213,8 +213,6 @@ class Login(graphene.Mutation):
 
         except ValidationError as e:
             return AuthPayload(errors=get_field_errors(e))
-        # except PermissionError as e:
-        #     return AuthPayload(errors=get_errors(e))
 
 
 class Authenticate(graphene.Mutation):
@@ -225,34 +223,34 @@ class Authenticate(graphene.Mutation):
 
     @classmethod
     def mutate(cls, context, info, **input):
-        request = info.context
-        input_data = input['input']
+        try:
+            authenticate_user_input = input.get('input', {})
+            provider = authenticate_user_input.get('provider')
+            code = authenticate_user_input.get('code')
+            request = info.context
 
-        provider = input_data['provider']
-        code = input_data['code']
+            request.auth_data = authenticate_user_input
 
-        request.auth_data = input_data
-        decorate_request(request, provider)
+            decorate_request(request, provider)
 
-        user = User()
-        manual_redirect_uri = request.auth_data.pop('redirect_uri', None)
+            manual_redirect_uri = request.auth_data.pop('redirect_uri', None)
 
-        request.backend.redirect_uri = settings.REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI
+            request.backend.redirect_uri = settings.REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI
+            request.backend.REDIRECT_STATE = False
+            request.backend.STATE_PARAMETER = False
 
-        request.backend.REDIRECT_STATE = False
-        request.backend.STATE_PARAMETER = False
+            user = request.backend.auth_complete()
 
-        user = request.backend.auth_complete()
+            # NOTE: will raise exception unless is_active == True; always false initially
+            # if user is None or not user.is_active:
+            #     raise ValidationError('No active account found with given credentials.')
+            # else:
+            #     login(request, user)
+            if user is not None: login(request, user)
 
-        if user is None or not user.is_active:
-            # raise serializers.ValidationError(
-            #     _('No active account found with given credentials'),
-            # )
-            pass
-        else:
-            login(info.context, user)
-
-        return AuthPayload(user=user)
+            return AuthPayload(user=user)
+        except ValidationError as e:
+            return AuthPayload(errors=get_field_errors(e))
 
 
 class Mutation(graphene.ObjectType):

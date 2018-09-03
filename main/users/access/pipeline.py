@@ -1,4 +1,6 @@
 from main.users.models import UserProfile, AuthGithub
+from main.helpers import update_or_create
+
 
 def save_profile(backend, user, response, *args, **kwargs):
     if backend.name == 'facebook':
@@ -11,22 +13,22 @@ def save_profile(backend, user, response, *args, **kwargs):
         profile.save()
 
     if backend.name == 'github':
-        if hasattr(user, 'profile') and user.profile is not None:
-            UserProfile.objects.create(
-                user=user,
-                avatar_url=response.get('avatar_url', None),
-                bio=response.get('bio', None),
-                first_name=None,
-                last_name=None
-            )
+        profile_instance = user.profile or UserProfile()
+        update_or_create(profile_instance, {
+            'user': user,
+            'avatar_url': response.get('avatar_url', None),
+            'bio': response.get('bio', None),
+            'first_name': None,
+            'last_name': None
+        })
 
-        if hasattr(user, 'auth_github') and user.auth_github is not None:
-            AuthGithub.objects.create(
-                user=user,
-                gh_id=response.get('id'),
-                display_name=response.get('login'),
-                response=response.__str__()
-            )
+        auth_github_instance = user.auth_github or AuthGithub()
+        update_or_create(auth_github_instance, {
+            'user': user,
+            'gh_id': response.get('id'),
+            'display_name': response.get('login'),
+            'response': response.__str__()
+        })
 
     if backend.name == 'gitlab':
         # TODO: implement condition
