@@ -212,11 +212,8 @@ class AddUser(AuthMutation, graphene.Mutation):
             try:
                 add_user_input = input.get('input', {})
 
-                instance = get_object(User, add_user_input.get('id'), User())
-
-                if instance:
-                    user = update_or_create(instance, add_user_input)
-                    return UserPayload(user=user)
+                user = User.objects.create_user(**add_user_input)
+                return UserPayload(user=user)
             except ValidationError as e:
                 return UserPayload(errors=get_field_errors(e))
 

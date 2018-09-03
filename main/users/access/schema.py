@@ -135,7 +135,6 @@ class Register(AuthMutation, graphene.Mutation):
 
                 user = User.objects.create_user(**register_user_input)
                 return UserPayload(user=user)
-
             except ValidationError as e:
                 return UserPayload(errors=get_field_errors(e))
 
