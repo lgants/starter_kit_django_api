@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth import get_user_model
 from graphene_django import DjangoObjectType
 # from graphene_django_subscriptions.subscription import Subscription
-from main.helpers import get_object, update_or_create, get_field_errors
+from main.helpers import get_object, update_or_create, get_errors, get_field_errors
 from main.permissions import AllowAny, AllowAuthenticated, AllowOwnerOrSuperuser
 from main.mixins import AuthType, AuthMutation
 from main.common import FieldError
@@ -169,14 +169,14 @@ class EditUserInput(graphene.InputObjectType):
     role = graphene.String() #role: String!
     isActive = graphene.Boolean() #isActive: Boolean
     email = graphene.String()  #email: String!
-    password = graphene.String() #NOTE: verify this works
+    password = graphene.String() # NOTE: verify this works
     profile = ProfileInput
     auth = AuthInput
 
 
 class UpdateUserPayload(graphene.ObjectType):
     mutation = graphene.String(required=True) #mutation: String!
-    node = User #node: User!
+    node = User #node: User! # TODO: implement
 
 
 class Query(graphene.ObjectType):
@@ -184,13 +184,17 @@ class Query(graphene.ObjectType):
     users = graphene.List(UserType)
     current_user = graphene.Field(UserType)
 
-    def resolve_user(self, info, **kwargs):
-        return get_object(User, kwargs['id'])
+    def resolve_user(self, info, **input):
+        try:
+            instance = User.objects.get(id=input.get('id'))
+            return UserPayload(user=instance)
+        except Exception as e:
+            return UserPayload(errors=get_errors(e))
 
-    def resolve_users(self, info, **kwargs):
+    def resolve_users(self, info, **input):
         return User.objects.all() # TODO: modify to use pagination
 
-    def resolve_current_user(self, info, **kwargs):
+    def resolve_current_user(self, info, **input):
         if info.context.user.is_anonymous:
             return None
         else:
