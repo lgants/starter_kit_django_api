@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from .managers import UserManager
 
 class User(AbstractUser):
     username = models.CharField(max_length=256, unique=True)
@@ -9,6 +9,8 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = UserManager()
 
 
 class UserProfile(models.Model):

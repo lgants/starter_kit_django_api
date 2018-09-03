@@ -1,12 +1,19 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth import get_user_model
 from graphene_django import DjangoObjectType
-from graphene_django_subscriptions.subscription import Subscription
+# from graphene_django_subscriptions.subscription import Subscription
 from main.helpers import get_object, update_or_create, get_field_errors
-from main.permissions import AllowAny, AllowStaff, AllowAuthenticated
+from main.permissions import AllowAny, AllowAuthenticated
 from main.mixins import AuthType, AuthMutation
 from main.common import FieldError
-from .models import (UserProfile, AuthCertificate, AuthFacebook, AuthGithub, AuthGoogle, AuthLinkedin)
+from .models import (
+    UserProfile,
+    AuthCertificate,
+    AuthFacebook,
+    AuthGithub,
+    AuthGoogle,
+    AuthLinkedin
+)
 import graphene
 
 
@@ -14,7 +21,7 @@ User = get_user_model()
 
 
 class UserProfileType(AuthType, DjangoObjectType):
-    # permission_classes = (AllowStaff,) # NOTE: works but implement permissions later
+    # permission_classes = (AllowAny,)
 
     firstName = graphene.String()
     lastName = graphene.String()
@@ -35,28 +42,28 @@ class AuthFacebookType(DjangoObjectType):
     class Meta:
         name = 'FacebookAuth'
         model = AuthFacebook
-        exclude_fields = ('fb_id', 'display_name')
+        # exclude_fields = ('fb_id', 'display_name')
 
 
 class AuthGithubType(DjangoObjectType):
     class Meta:
         name = 'GithubAuth'
         model = AuthGithub
-        exclude_fields = ('gh_id', 'display_name')
+        # exclude_fields = ('gh_id', 'display_name')
 
 
 class AuthGoogleType(DjangoObjectType):
     class Meta:
         name = 'GoogleAuth'
         model = AuthGoogle
-        exclude_fields = ('google_id', 'display_name')
+        # exclude_fields = ('google_id', 'display_name')
 
 
 class AuthLinkedinType(DjangoObjectType):
     class Meta:
         name = 'LinkedInAuth'
         model = AuthLinkedin
-        exclude_fields = ('ln_id', 'display_name')
+        # exclude_fields = ('ln_id', 'display_name')
 
 
 class UserAuthType(graphene.ObjectType):
@@ -77,7 +84,8 @@ class UserType(DjangoObjectType):
     class Meta:
         name = 'User'
         model = User
-        exclude_fields = ('email', 'password', 'is_active', 'is_staff', 'is_superuser', 'role', 'date_joined', 'created_at', 'updated_at')
+        # NOTE: exclusion of these fields currently breaks everything
+        # exclude_fields = ('email', 'password', 'is_active', 'is_staff', 'is_superuser', 'date_joined', 'created_at', 'updated_at')
 
 
 class UserPayload(graphene.ObjectType):
