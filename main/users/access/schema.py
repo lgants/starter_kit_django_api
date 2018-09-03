@@ -7,12 +7,14 @@ from rest_framework_simplejwt.state import token_backend
 from rest_social_auth.views import decorate_request
 # from graphene_django_subscriptions.subscription import Subscription
 from graphene_django import DjangoObjectType
+# from graphql.error import GraphQLError
 from main.users.schema import UserType, UserPayload
 from main.common import FieldError
 from main.helpers import get_object, update_or_create, get_errors, get_field_errors
+from main.permissions import AllowAny, AllowAuthenticated
+from main.mixins import AuthType, AuthMutation
 from social_django.utils import load_backend, load_strategy
 from .decorators import social_auth
-from .mixins import SocialAuthMixin
 from .types import SocialType
 import graphql_social_auth
 import graphql_jwt
@@ -43,20 +45,21 @@ class AuthPayload(graphene.ObjectType):
         return self.user
 
     def resolve_tokens(self, info, **kwargs):
-        refresh = RefreshToken.for_user(self.user)
-        access = refresh.access_token
+        if self.user:
+            refresh = RefreshToken.for_user(self.user)
+            access = refresh.access_token
 
-        access_token = token_backend.encode(access.payload)
-        refresh_token = token_backend.encode(refresh.payload)
+            access_token = token_backend.encode(access.payload)
+            refresh_token = token_backend.encode(refresh.payload)
 
-        return Tokens(
-            accessToken=access_token,
-            refreshToken=refresh_token
-        )
+            return Tokens(
+                accessToken=access_token,
+                refreshToken=refresh_token
+            )
+        else:
+            return None
 
     def resolve_errors(self, info, **kwargs):
-        # check if user is valid else return errors
-        # return [FieldError]
         return self.errors
 
 
@@ -81,8 +84,7 @@ class RegisterUserInput(graphene.InputObjectType):
 
 
 class LoginUserInput(graphene.InputObjectType):
-    # NOTE: only username currently works
-    usernameOrEmail = graphene.String(required=True) # NOTE: only username currently works
+    usernameOrEmail = graphene.String(required=True)
     password = graphene.String(required=True)
 
 
@@ -103,6 +105,7 @@ class ForgotPassword(graphene.Mutation):
         return cls(message="")
 
 
+# TODO: implement
 class ResetPassword(graphene.Mutation):
     class Arguments:
         #   resetPassword(input: ResetPasswordInput!): ResetPayload!
@@ -115,7 +118,9 @@ class ResetPassword(graphene.Mutation):
         return ResetPayload
 
 
-class Register(graphene.Mutation):
+class Register(AuthMutation, graphene.Mutation):
+    permission_classes = (AllowAny,)
+
     class Arguments:
         # register(input: RegisterUserInput!): UserPayload!
         input = graphene.Argument(RegisterUserInput, required=True)
@@ -124,7 +129,17 @@ class Register(graphene.Mutation):
 
     @classmethod
     def mutate(cls, context, info, **input):
-        return UserPayload(user=User(**input['input']))
+        if cls.has_permission(context, info, input):
+            try:
+                register_user_input = input.get('input', {})
+
+                instance = get_object(User, register_user_input.get('id'), User())
+
+                if instance:
+                    user = update_or_create(instance, register_user_input)
+                    return UserPayload(user=user)
+            except ValidationError as e:
+                return UserPayload(errors=get_field_errors(e))
 
 
 class RefreshTokens(graphene.Mutation):
@@ -187,36 +202,20 @@ class Login(graphene.Mutation):
             user = User.objects.get_or_none(Q(username__iexact=usernameOrEmail) | Q(email__iexact=usernameOrEmail))
 
             if user is None:
-                raise ValidationError({'usernameOrEmail': 'Please enter a valid username or email.'})
+                raise ValidationError({'usernameOrEmail': 'Please enter a valid Username or Email.'})
 
+            # TODO: generic error not configured
             if not user.is_active:
-                raise ValidationError('No active account found with given credentials')
-
+                raise PermissionError('No active account found with given credentials')
 
             if user.check_password(password):
                 login(info.context, user, backend='django.contrib.auth.backends.ModelBackend')
                 return AuthPayload(user=user)
 
-        except Exception as e:
+        except ValidationError as e:
             return AuthPayload(errors=get_field_errors(e))
-
-
-
-        # # username_field = User.USERNAME_FIELD
-        # # user = authenticate(**{
-        # #     username_field: input['input']['usernameOrEmail'],
-        # #     'password': input['input']['password'],
-        # # })
-        #
-        # if user is None or not user.is_active:
-        #     # raise serializers.ValidationError(
-        #     #     _('No active account found with given credentials'),
-        #     # )
-        #     pass
-        # else:
-        #     login(info.context, user)
-        #
-        # return AuthPayload(user=user)
+        # except PermissionError as e:
+        #     return AuthPayload(errors=get_errors(e))
 
 
 class Authenticate(graphene.Mutation):

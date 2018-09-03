@@ -11,14 +11,14 @@ from types import SimpleNamespace
 def get_object(model, id, otherwise=None):
     try:
         return model.objects.get(pk=id)
-    except cls._meta.model.DoesNotExist:
+    except model.DoesNotExist:
         return otherwise
 
 def update_or_create(instance, input, exception=['id']):
     if instance:
         [setattr(instance, key, value) for key, value in input.items() if key not in exception]
 
-    instance.full_clean() #NOTE: necessary to raise ValidationError
+    instance.full_clean() # NOTE: necessary to raise ValidationError
     # NOTE: elasticsearch must be running as every saved instance must go through elasticsearch
     instance.save()
 
@@ -32,7 +32,8 @@ def get_errors(e):
     # messages = ['; '.join(m) for m in e.message_dict.values()]
     # errors = [i for pair in zip(fields, messages) for i in pair]
     # return errors
-    return e.message_dict
+    # import pdb; pdb.set_trace()
+    return e
 
 def get_field_errors(e):
     errors = []

@@ -106,6 +106,7 @@ class OrderByUserInput(graphene.InputObjectType):
   order = graphene.String() # order: String
 
 
+# TODO: implement
 class FilterUserInput(graphene.InputObjectType):
     # search by username or email
     searchText = graphene.String() # searchText: String
@@ -210,7 +211,8 @@ class AddUser(AuthMutation, graphene.Mutation):
         if cls.has_permission(context, info, input):
             try:
                 add_user_input = input.get('input', {})
-                instance = get_object(User, add_user_input.get('id'))
+
+                instance = get_object(User, add_user_input.get('id'), User())
 
                 if instance:
                     user = update_or_create(instance, add_user_input)
