@@ -27,6 +27,7 @@ class UserManager(BaseUserManager):
                           is_superuser=is_superuser,
                           date_joined=now, **extra_fields)
         user.set_password(password)
+        user.full_clean() # NOTE: necessary to raise ValidationError
         user.save(using=self._db)
         return user
 
