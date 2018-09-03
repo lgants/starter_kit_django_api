@@ -133,11 +133,9 @@ class Register(AuthMutation, graphene.Mutation):
             try:
                 register_user_input = input.get('input', {})
 
-                instance = get_object(User, register_user_input.get('id'), User())
+                user = User.objects.create_user(**register_user_input)
+                return UserPayload(user=user)
 
-                if instance:
-                    user = update_or_create(instance, register_user_input)
-                    return UserPayload(user=user)
             except ValidationError as e:
                 return UserPayload(errors=get_field_errors(e))
 
@@ -211,6 +209,8 @@ class Login(graphene.Mutation):
             if user.check_password(password):
                 login(info.context, user, backend='django.contrib.auth.backends.ModelBackend')
                 return AuthPayload(user=user)
+            else:
+                raise ValidationError({'password': 'Invalid password'})
 
         except ValidationError as e:
             return AuthPayload(errors=get_field_errors(e))
