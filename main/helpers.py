@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+import re
 
 # from graphql_relay.node.node import from_global_id
 #
@@ -7,6 +8,25 @@ from types import SimpleNamespace
 #         return object_name.objects.get(pk=from_global_id(relayId)[1])
 #     except:
 #         return otherwise
+
+def _camelize(str):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', str)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+def camelizeKeys(obj):
+    result = {}
+    for key, value in obj.items():
+        setattr(result, _camelize(key), value)
+    return result
+
+
+def _decamelize(obj):
+    pass
+
+
+def decamelizeKeys(obj):
+    pass
+
 
 def get_object(model, id, otherwise=None):
     try:

@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from graphene_django import DjangoObjectType
 # from graphene_django_subscriptions.subscription import Subscription
 from main.helpers import get_object, update_or_create, get_errors, get_field_errors
@@ -141,11 +142,11 @@ class AuthLinkedInInput(graphene.InputObjectType):
 
 
 class AuthInput(graphene.InputObjectType):
-    certificate = AuthCertificateInput #certificate: AuthCertificateInput
-    facebook = AuthFacebookInput #facebook: AuthFacebookInput
-    google = AuthGoogleInput #google: AuthGoogleInput
-    github = AuthGitHubInput #github: AuthGitHubInput
-    linkedin = AuthLinkedInInput #linkedin: AuthLinkedInInput
+    certificate = graphene.Field(AuthCertificateInput) #certificate: AuthCertificateInput
+    facebook = graphene.Field(AuthFacebookInput) #facebook: AuthFacebookInput
+    google = graphene.Field(AuthGoogleInput) #google: AuthGoogleInput
+    github = graphene.Field(AuthGitHubInput) #github: AuthGitHubInput
+    linkedin = graphene.Field(AuthLinkedInInput) #linkedin: AuthLinkedInInput
 
 
 class ProfileInput(graphene.InputObjectType):
@@ -159,8 +160,8 @@ class AddUserInput(graphene.InputObjectType):
     password = graphene.String(required=True) # password: String!
     role = graphene.String(required=True) # role: String!
     isActive = graphene.Boolean() # isActive: Boolean
-    profile = ProfileInput # profile: ProfileInput
-    auth = AuthInput # auth: AuthInput
+    profile = graphene.Field(ProfileInput) # profile: ProfileInput
+    auth = graphene.Field(AuthInput) # auth: AuthInput
 
 
 class EditUserInput(graphene.InputObjectType):
@@ -170,8 +171,8 @@ class EditUserInput(graphene.InputObjectType):
     isActive = graphene.Boolean() #isActive: Boolean
     email = graphene.String()  #email: String!
     password = graphene.String() # NOTE: verify this works
-    profile = ProfileInput
-    auth = AuthInput
+    profile = graphene.Field(ProfileInput) # profile: ProfileInput
+    auth = graphene.Field(AuthInput) # auth: AuthInput
 
 
 class UpdateUserPayload(graphene.ObjectType):
@@ -223,7 +224,8 @@ class AddUser(AuthMutation, graphene.Mutation):
 
 
 class EditUser(AuthMutation, graphene.Mutation):
-    permission_classes = (AllowAuthenticated, AllowOwnerOrSuperuser)
+    # permission_classes = (AllowAuthenticated, AllowOwnerOrSuperuser)
+    permission_classes = (AllowAuthenticated, )
 
     class Arguments:
         # editUser(input: EditUserInput!): UserPayload!
@@ -235,18 +237,35 @@ class EditUser(AuthMutation, graphene.Mutation):
     def mutate(cls, context, info, **input):
         if cls.has_permission(User, info, input):
             try:
-                edit_user_input = input.get('input', {})
-                instance = get_object(User, edit_user_input.get('id'))
+                with transaction.atomic():
+                    edit_user_input = input.get('input', {})
 
-                if instance:
-                    user = update_or_create(instance, edit_user_input)
+                    user_input = edit_user_input
+                    profile_input = edit_user_input.pop('profile', None)
+                    auth_input = edit_user_input.pop('auth', None) # TODO: implmenet auth
+
+                    user = get_object(User, user_input.get('id'), User())
+                    profile = UserProfile.objects.get_or_create(user=user)
+
+                    import pdb; pdb.set_trace()
+
+                    if user:
+                        password = edit_user_input.pop('password')
+                        if password: user_instance.set_password(password)
+
+                        user = update_or_create(user, user_input)
+                    if profile_instance:
+                        profile = update_or_create(profile, profile_input)
+
                     return UserPayload(user=user)
             except ValidationError as e:
+                return UserPayload(errors=get_field_errors(e))
+            except DatabaseError as e:
                 return UserPayload(errors=get_field_errors(e))
 
 
 class DeleteUser(AuthMutation, graphene.Mutation):
-    permission_classes = (AllowAuthenticated,)
+    permission_classes = (AllowAuthenticated, AllowOwnerOrSuperuser)
 
     class Arguments:
         # deleteUser(id: Int!): UserPayload!
