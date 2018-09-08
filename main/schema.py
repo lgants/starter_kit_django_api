@@ -26,6 +26,7 @@ class RootMutation(
 class RootSubscription(
     main.counters.schema.Subscription,
     main.posts.schema.Subscription,
+    main.users.schema.Subscription,
     graphene.ObjectType):
     pass
 
@@ -33,6 +34,6 @@ class RootSubscription(
 schema = graphene.Schema(
     query=RootQuery,
     mutation=RootMutation,
-    # subscription=RootSubscription,
+    subscription=RootSubscription,
     # types=[Upload]
 )

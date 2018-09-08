@@ -44,6 +44,8 @@ THIRD_PARTY_APPS = (
     'django_extensions',
     'rest_framework',
     'rest_framework.authtoken',
+    'channels',
+    'channels_api',
     'corsheaders',
     'graphene_django',
     'social_django', # django social auth

@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from graphene_django import DjangoObjectType
 # from graphene_django_subscriptions.subscription import Subscription
+from graphene_django_subscriptions.subscription import Subscription
 from main.helpers import get_object, update_or_create, get_errors, get_field_errors
 from main.permissions import AllowAny, AllowAuthenticated, AllowOwnerOrSuperuser
 from main.mixins import AuthType, AuthMutation
@@ -14,6 +15,9 @@ from .models import (
     AuthGithub,
     AuthGoogle,
     AuthLinkedin
+)
+from .serializers import (
+    UserSerializer
 )
 import graphene
 
@@ -192,7 +196,13 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return UserPayload(errors=get_errors(e))
 
+
     def resolve_users(self, info, **input):
+        # orderBy=OrderByUserInput,
+        #     filter=FilterUserInput
+        # order_by_user_input =
+        # filter_user_input =
+        # import pdb; pdb.set_trace()
         return User.objects.all() # TODO: modify to use pagination
 
     def resolve_current_user(self, info, **input):
@@ -294,3 +304,14 @@ class Mutation(graphene.ObjectType):
     editUser = EditUser.Field()
     # Delete a user
     deleteUser = DeleteUser.Field()
+
+
+class UserSubscription(Subscription):
+    class Meta:
+        serializer_class = UserSerializer
+        stream = 'onUsersUpdated'
+        # description = 'User Subscription'
+
+class Subscription(graphene.ObjectType):
+    # user_subscription = UserSubscription.Field()
+    usersUpdated = UserSubscription.Field()
