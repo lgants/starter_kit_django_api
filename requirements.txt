@@ -10,7 +10,7 @@ chardet==3.0.4
 constantly==15.1.0
 daphne==1.4.2
 defusedxml==0.5.0
-Django==2.0.7
+Django==2.2.13
 django-cors-headers==2.4.0
 django-environ==0.4.5
 django-extensions==2.0.7
