@@ -19,7 +19,7 @@ django-graphql-jwt==0.1.10
 django-graphql-social-auth==0.1.1
 django-oauth-toolkit==1.2.0
 django-webpack-loader==0.6.0
-djangorestframework==3.8.2
+djangorestframework==3.11.2
 djangorestframework-jwt==1.11.0
 djangorestframework-simplejwt==3.2.3
 graphene==2.1.3
