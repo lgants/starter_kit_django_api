@@ -51,5 +51,5 @@ social-auth-core==1.7.0
 Twisted==18.7.0
 txaio==2.10.0
 typing==3.6.4
-urllib3==1.23
+urllib3==1.26.5
 zope.interface==4.5.0
