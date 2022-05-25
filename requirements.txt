@@ -37,7 +37,7 @@ iso8601==0.1.12
 oauthlib==2.1.0
 promise==2.1
 PyHamcrest==1.9.0
-PyJWT==1.6.4
+PyJWT==2.4.0
 python3-openid==3.1.0
 pytz==2018.5
 requests==2.19.1
